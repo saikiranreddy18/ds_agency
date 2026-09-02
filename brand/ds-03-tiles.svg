@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" style="color:#101214" role="img" aria-label="DS Agency">
+  <!-- 03 · Tiles: two tools on the board, and the packet moving between them. -->
+  <g transform="translate(0 6)">
+    <rect x="2" y="6" width="34" height="22" rx="7" fill="currentColor" opacity=".18"/>
+    <rect x="0" y="2" width="34" height="22" rx="7" fill="currentColor"/>
+    <rect x="30" y="30" width="34" height="22" rx="7" fill="currentColor" opacity=".18"/>
+    <rect x="28" y="26" width="34" height="22" rx="7" fill="currentColor"/>
+    <path d="M17 24 v9 h11" fill="none" stroke="#f2b544" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="28" cy="33" r="5" fill="#f2b544"/>
+  </g>
+  <g fill="currentColor" font-family="Manrope, Inter, system-ui, sans-serif" font-weight="800" letter-spacing="-.5">
+    <text x="82" y="41" font-size="30">DS</text>
+    <text x="134" y="41" font-size="30" font-weight="600">Agency</text>
+  </g>
+</svg>

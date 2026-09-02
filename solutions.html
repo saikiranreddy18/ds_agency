@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solutions</title>
+  <meta name="description" content="AI booking websites, lead capture and follow-up, AI customer support, WhatsApp automation, CRM automation, review automation and internal operations, filterable by industry and use case.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f2f3f5'/%3E%3Crect x='7' y='15' width='16' height='2' fill='%230b0c0e'/%3E%3Ccircle cx='23' cy='11' r='4' fill='%23f2b544' stroke='%230b0c0e' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="solutions">
+
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Solutions</p>
+      <h1>Solutions built for real business problems.</h1>
+      <p class="lead">Start with a proven system or let us design one around your workflow. Filter by your industry or by the job you need done.</p>
+    </div>
+  </section>
+
+  <div class="filterbar" role="region" aria-label="Filter solutions">
+    <div class="wrap groups">
+      <div class="g" role="group" aria-label="Industry">
+        <span class="lbl">Industry</span>
+        <button class="chip" data-group="industry" data-value="all" aria-pressed="true">All</button>
+        <button class="chip" data-group="industry" data-value="healthcare" aria-pressed="false">Healthcare</button>
+        <button class="chip" data-group="industry" data-value="fitness" aria-pressed="false">Fitness</button>
+        <button class="chip" data-group="industry" data-value="home" aria-pressed="false">Home Services</button>
+        <button class="chip" data-group="industry" data-value="ecommerce" aria-pressed="false">E-commerce</button>
+        <button class="chip" data-group="industry" data-value="professional" aria-pressed="false">Professional Services</button>
+        <button class="chip" data-group="industry" data-value="education" aria-pressed="false">Education</button>
+        <button class="chip" data-group="industry" data-value="other" aria-pressed="false">Other</button>
+      </div>
+      <div class="g" role="group" aria-label="Use case">
+        <span class="lbl">Use case</span>
+        <button class="chip" data-group="use" data-value="all" aria-pressed="true">All</button>
+        <button class="chip" data-group="use" data-value="leads" aria-pressed="false">Lead Generation</button>
+        <button class="chip" data-group="use" data-value="booking" aria-pressed="false">Appointment Booking</button>
+        <button class="chip" data-group="use" data-value="support" aria-pressed="false">Customer Support</button>
+        <button class="chip" data-group="use" data-value="followup" aria-pressed="false">Follow-Up</button>
+        <button class="chip" data-group="use" data-value="ops" aria-pressed="false">Internal Operations</button>
+        <button class="chip" data-group="use" data-value="reviews" aria-pressed="false">Reviews</button>
+        <button class="chip" data-group="use" data-value="sales" aria-pressed="false">Sales</button>
+        <button class="chip" data-group="use" data-value="crm" aria-pressed="false">CRM</button>
+        <span class="count" aria-live="polite"></span>
+      </div>
+    </div>
+  </div>
+
+  <section class="block tight" style="padding-top:0">
+    <div class="wrap">
+      <div class="bento" data-render="catalog"></div>
+      <div class="catalog-empty" hidden>No packaged solution matches both filters yet. <a href="contact.html">Describe your workflow</a> and we will design one around it.</div>
+    </div>
+  </section>
+
+  <section class="block cta-band">
+    <div class="wrap">
+      <h2>Not sure which one fits?</h2>
+      <p>Most businesses need a mix of two. Describe your day and we'll map the flow that fits.</p>
+      <div class="actions"><a class="btn primary" href="book.html">Book a Free Strategy Call <span class="arr">→</span></a><a class="btn ghost" href="industries.html">Browse by industry</a></div>
+    </div>
+  </section>
+
+  <script src="site.config.js"></script>
+  <script src="data.js"></script>
+  <script src="site.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DS Agency logo variations</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .logos { display: grid; gap: var(--s3); }
+    .logo-row { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; }
+    .logo-row .tile { padding: var(--s4); display: grid; align-content: center; gap: var(--s2); min-height: 180px; }
+    .logo-row .tile.dark { background: #0b0c0e; color: #f2f3f5; }
+    .logo-row .tile.light { background: #ffffff; color: #101214; }
+    .logo-row .tile svg { width: 100%; max-width: 320px; height: auto; color: inherit; }
+    .logo-row .tile.dark svg { color: #f2f3f5; }
+    .logo-row .tile.light svg { color: #101214; }
+    .logo-meta { grid-column: 1 / -1; padding: var(--s2) var(--s4); border-top: 1px solid var(--line); background: var(--bg-1); display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; }
+    .logo-meta b { font-family: var(--display); }
+    .logo-meta code { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+    .logo-meta p { margin: 0; color: var(--text-2); font-size: 0.9rem; flex-basis: 100%; }
+    .mark-only { display: flex; gap: 12px; align-items: center; }
+    .mark-only .sq { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; }
+    @media (max-width: 700px) { .logo-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="logos">
+
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Brand</p>
+      <h1>Five ways to draw DS.</h1>
+      <p class="lead">Each variation is a standalone SVG in the <code style="font-family:var(--mono)">brand/</code> folder. The mark uses <code style="font-family:var(--mono)">currentColor</code> for ink so it flips between dark and light backgrounds; the amber node is fixed. Shown on both backgrounds below.</p>
+    </div>
+  </section>
+
+  <section class="block tight" style="padding-top:0">
+    <div class="wrap logos" id="logos"></div>
+  </section>
+
+  <script src="site.config.js"></script>
+  <script src="data.js"></script>
+  <script src="site.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    (async () => {
+      const list = [
+        ["brand/ds-01-node.svg", "01 · Node", "The rail and the lit node, the same mark the site already uses in the header. Quietest option; reads at 16px."],
+        ["brand/ds-02-handoff.svg", "02 · Handoff", "D and S as thick strokes, the S ending in the node. The letters are the workflow."],
+        ["brand/ds-03-tiles.svg", "03 · Tiles", "Two tool tiles with the packet moving between them, lifted from the 3D hero board."],
+        ["brand/ds-04-loop.svg", "04 · Loop", "Badge form: a D-shaped circuit with the S as the wire through it. Works as an app icon or favicon."],
+        ["brand/ds-05-wordmark.svg", "05 · Wordmark", "Heavy geometric DS with an amber full stop and a small descriptor. For letterheads and the footer."],
+      ];
+      const root = document.getElementById("logos");
+      for (const [file, title, note] of list) {
+        // Standalone files carry a default ink colour; drop it here so each tile's colour applies.
+        const svg = (await fetch(file).then((r) => r.text())).replace(/\sstyle="color:[^"]*"/, "");
+        const row = document.createElement("div"); row.className = "logo-row";
+        row.innerHTML = `<div class="tile dark">${svg}</div><div class="tile light">${svg}</div>
+          <div class="logo-meta"><b>${title}</b><code>${file}</code><p>${note}</p></div>`;
+        root.append(row);
+      }
+    })();
+  </script>
+</body>
+</html>

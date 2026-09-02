@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact</title>
+  <meta name="description" content="Tell us what you're trying to improve. We usually respond within 24 hours.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f2f3f5'/%3E%3Crect x='7' y='15' width='16' height='2' fill='%230b0c0e'/%3E%3Ccircle cx='23' cy='11' r='4' fill='%23f2b544' stroke='%230b0c0e' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="contact">
+
+  <section class="page-head" style="padding-bottom:var(--s3)">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h1>Tell us what you're trying to improve.</h1>
+      <p class="lead">A sentence or two is enough. We usually respond within <span data-site="responseTime">24 hours</span>.</p>
+    </div>
+  </section>
+
+  <section class="block tight" style="padding-top:0">
+    <div class="wrap split">
+      <div>
+        <h2 style="font-size:1.4rem">Direct</h2>
+        <p>Email: <a data-site="email" href="#"></a></p>
+        <div class="row">
+          <a class="btn ghost sm" data-contact="whatsapp" href="#">Message on WhatsApp</a>
+          <a class="btn primary sm" href="book.html">Book a call instead</a>
+        </div>
+        <h2 style="font-size:1.4rem;margin-top:var(--s4)">What happens next</h2>
+        <ul class="agenda">
+          <li><span class="i">01</span><div><b>You get a reply within <span data-site="responseTime">24 hours</span></b><span>In your time zone, from the person who would build your system.</span></div></li>
+          <li><span class="i">02</span><div><b>If it looks like a fit, we suggest a call</b><span>30 minutes, free, with a written roadmap afterwards.</span></div></li>
+          <li><span class="i">03</span><div><b>No newsletter, no drip campaign</b><span>Your details are used only to reply to you.</span></div></li>
+        </ul>
+      </div>
+
+      <form class="contact" novalidate>
+        <!-- Hidden fields feed future automations: new lead -> CRM + follow-up -->
+        <input type="hidden" name="source_page" value="">
+        <input type="hidden" name="timezone" value="">
+        <input type="hidden" name="_subject" value="New website enquiry">
+        <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+        <div class="two">
+          <label>Name <input type="text" name="name" required autocomplete="name"><span class="err-msg">Enter your name.</span></label>
+          <label>Work email <input type="email" name="email" required autocomplete="email"><span class="err-msg">Enter a valid email address.</span></label>
+        </div>
+        <div class="two">
+          <label>Company <input type="text" name="company" autocomplete="organization"></label>
+          <label>Country
+            <select name="country" required>
+              <option value="">Choose…</option>
+              <option>India</option><option>United States</option><option>United Kingdom</option><option>Australia</option><option>Canada</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Singapore</option><option>Malaysia</option><option>Germany</option><option>Netherlands</option><option>Other</option>
+            </select>
+            <span class="err-msg">Choose your country.</span>
+          </label>
+        </div>
+        <div class="two">
+          <label>Website <span class="opt">(optional)</span> <input type="url" name="website" placeholder="https://" autocomplete="url"></label>
+          <label>Industry
+            <select name="industry" required>
+              <option value="">Choose…</option>
+              <option>Healthcare / clinic</option><option>Dental</option><option>Fitness</option><option>Salon / beauty</option><option>Home services</option><option>E-commerce</option><option>Agency</option><option>Consulting</option><option>Professional services</option><option>Education</option><option>Local services</option><option>Other</option>
+            </select>
+            <span class="err-msg">Choose your industry.</span>
+          </label>
+        </div>
+        <label>What would you like to automate?
+          <select name="automate" required>
+            <option value="">Choose…</option>
+            <option>Lead capture and follow-up</option><option>Appointment booking</option><option>Customer support</option><option>WhatsApp workflows</option><option>CRM and data entry</option><option>Reviews</option><option>Internal operations and reporting</option><option>Not sure yet</option>
+          </select>
+          <span class="err-msg">Pick the closest option.</span>
+        </label>
+        <label>Message
+          <textarea name="message" required placeholder="Example: we miss calls while on jobs and quotes take two days to send."></textarea>
+          <span class="err-msg">Tell us a little about the problem.</span>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">Start the Conversation <span class="arr">→</span></button>
+          <p class="fine">We usually respond within <span data-site="responseTime">24 hours</span>.</p>
+        </div>
+        <p class="status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <script src="site.config.js"></script>
+  <script src="data.js"></script>
+  <script src="site.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

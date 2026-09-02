@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" style="color:#101214" role="img" aria-label="DS Agency">
+  <!-- 05 · Wordmark: heavy geometric DS drawn as strokes, an amber full stop as the node, agency set small. -->
+  <g fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 10 v44 h14 a22 22 0 0 0 0 -44 z"/>
+    <path d="M96 18 c0 -10 -34 -10 -34 2 c0 12 34 8 34 21 c0 12 -34 12 -34 2"/>
+  </g>
+  <circle cx="114" cy="48" r="7" fill="#f2b544"/>
+  <g fill="currentColor" font-family="Manrope, Inter, system-ui, sans-serif">
+    <text x="138" y="36" font-size="22" font-weight="700" letter-spacing="-.3">agency</text>
+    <text x="139" y="52" font-size="10" font-weight="500" letter-spacing="2.4" opacity=".6">AI · AUTOMATION</text>
+  </g>
+</svg>
