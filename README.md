@@ -36,6 +36,17 @@ Static site, no build step. Dark editorial design with one amber accent and a sh
 | Exit-intent audit offer | All pages except booking/contact | Desktop only, once per session, after 8 s. Uses `formEndpoint` or mailto. |
 | Booking success state | Booking page | Cal.com `bookingSuccessful` event replaces the agenda with next steps. |
 | Sticky CTA hint | Mobile | One line under the button. |
+| Problem-card icons | Home | Pop in with a stagger as the row reveals. |
+| Service glow | Home | Lift plus thin amber glow border on hover. |
+| Catalog hover + reflow | Home, Solutions | Hover reveals three typical impacts and speeds the mini flow; filters reflow with a FLIP glide. |
+| Timeline draw | Home `#process` | Line draws itself and stages appear one by one. |
+| Industry trust bar | Home `#trust` | Chips with hover tooltips: the usual leak and the solution we start with (targets only). |
+| CTA pulse | Final CTA bands | Soft pulse behind the primary button. |
+| Case-study story | Case-study detail | Sections reveal, a rail draws down the left on wide screens, metrics pop and count up. |
+| Booking explainer | Booking | Pick a time → We audit → You get a plan, animated. |
+| About parallax | About | Two soft shapes move with scroll (CSS scroll-timeline where supported). |
+| Reduce motion switch | Footer | Site-level no-animation mode, remembered per browser; OS setting also respected. |
+| Section dividers | All `.rule` sections | Slow low-contrast light along the divider line. |
 
 Deliberately not built: animated counters with invented numbers, a "recent wins" ticker, and a client-side AI chat (would expose an API key; route through an n8n webhook if wanted).
 

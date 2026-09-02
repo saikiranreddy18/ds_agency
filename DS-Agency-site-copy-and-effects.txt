@@ -1,0 +1,360 @@
+DS AGENCY — WEBSITE COPY AND EFFECTS NOTES
+==========================================
+Generated 2026-09-02 from the built site (github.com/saikiranreddy18/ds_agency).
+Everything below is what the live pages say and do. Metrics are targets or
+illustrative scenarios and are labelled that way on the site.
+
+Brand
+-----
+Name: DS Agency
+Value proposition: AI websites and automations built around how your business works.
+Tone: clear, confident, practical, no hype. Global English.
+Regions: India, United States, United Kingdom, Australia, Canada, Europe,
+Middle East, Southeast Asia. Based in India. Replies within 24 hours.
+Primary CTA everywhere: "Book a Free Strategy Call". Secondary: "Explore Solutions".
+Keywords used naturally: AI automation agency, AI website for small business,
+business process automation, appointment booking automation.
+
+
+HOMEPAGE (index.html) — section order
+-------------------------------------
+
+01 HERO
+  Eyebrow: AI automation agency
+  H1: AI websites and automations built around how your business works.
+  Lead: We design and build AI-powered websites, lead systems, booking flows,
+        and business automations that reduce manual work and help you respond
+        to customers faster.
+  Buttons: Book a Free Strategy Call → | Explore Solutions →
+  Micro-trust row: Built for businesses that want to — Capture more leads ·
+        Automate follow-ups · Reduce admin · Book more appointments · Operate 24/7
+  Right column: 3D automation board. A lead packet travels
+        Lead → AI website → Qualification → CRM → WhatsApp/Email → Appointment → Follow-up.
+  Caption: Example flow. Every tile is a tool you already own, wired so a lead
+        moves through the whole system without waiting for a person.
+  EFFECTS: kinetic headline (word by word); slow gradient mesh behind; cursor
+        halo on desktop; 3D board with travelling packet, rising tiles, board
+        ripples, pointer tilt, hover labels. URL ?for=<industry> personalises the
+        eyebrow, headline, lead and Explore link (e.g. ?for=healthcare).
+
+02 THE PROBLEM
+  H2: Your business shouldn't depend on manual work for everything.
+  Lead: Hover or tap a card to see what the automated version looks like.
+  Cards (front → back):
+   - Missed leads: Customers contact you after hours and never receive a response.
+       → Missed lead: AI captures → qualifies → follows up → books. In seconds, at any hour.
+   - Manual follow-ups: Your team repeatedly sends emails, messages, and reminders.
+       → Follow-up sequence: Reply → nudge → offer → book, on a schedule that stops the moment they answer.
+   - Booking friction: Customers have to call, message, or wait to schedule an appointment.
+       → Self-serve booking: Live calendar → confirmation → reminder → reschedule link. No phone tag.
+   - Repetitive admin: Your team spends hours moving information between systems.
+       → Data that moves itself: Form → CRM → invoice → report. Entered once, landed everywhere.
+   - Disconnected tools: Your website, CRM, calendar, messaging, and internal systems don't communicate.
+       → One connected workflow: Website ↔ CRM ↔ calendar ↔ WhatsApp ↔ email, in sync, with a log of every step.
+  EFFECTS: row fades in on scroll; each card's icon pops in with a stagger;
+        hover/tap flips problem → automated solution.
+
+03 WHAT WE DO DIFFERENTLY
+  H2: We don't just build websites. We build systems around them.
+  Lead: A website that ends at a contact form leaves everything after it to
+        people. Ours hand the work forward.
+  Left (Traditional website): Website → Form (manual) → Response (manual) →
+        Follow-up (manual) → Booking (manual). Foot: Four of five steps wait for a
+        person. Evenings, weekends and busy days become lost leads.
+  Right (AI-powered system, visually dominant): Website → AI conversation →
+        Lead qualification → CRM update → Automated follow-up → Appointment →
+        Reminder → Review request (all automated). Foot: Your team joins the
+        conversation when a human adds value, with the full context in front of them.
+  EFFECTS: scroll reveal.
+
+04 SERVICES
+  H2: From first click to completed workflow.
+  BUILD — AI Websites & Conversion Experiences. Build websites designed to
+        capture attention, explain value, collect leads, and drive action.
+        AI-powered websites · Landing pages · Lead capture · Conversion
+        optimization · Booking experiences. CTA: Explore Build →
+  AUTOMATE — Business Process Automation. Connect the tools your business
+        already uses and remove repetitive manual work. Lead routing · CRM
+        automation · Appointment automation · Email automation · WhatsApp
+        workflows · Internal notifications. CTA: Explore Automate →
+  SCALE — Optimization & Intelligent Systems. Continuously improve your
+        workflows as your business grows. Analytics · AI agents · Workflow
+        optimization · New integrations · Process improvements. CTA: Explore Scale →
+  EFFECTS: cards lift on hover with a thin amber glow border; staggered reveal.
+
+05 SOLUTIONS (bento catalog)
+  H2: Solutions built for real business problems.
+  Lead: Start with a proven system or let us design one around your workflow.
+  Cards (category · name · one-line outcome · target badge):
+   - Appointment booking · AI Booking Website · For clinics, salons, consultants
+     and appointment-based businesses. · Target: 20–30% fewer no-shows
+   - Lead generation · Lead Capture + Follow-Up · Capture, qualify and
+     automatically follow up with new prospects. · Target: reply in seconds, 24/7
+   - Customer support · AI Customer Support · Answer common questions 24/7 and
+     route complex requests to your team. · Target: most tickets without a human
+   - Messaging · WhatsApp Automation · Turn WhatsApp conversations into
+     structured business workflows. · Target: every chat logged, none lost
+   - CRM · CRM Automation · Automatically organize leads, customers and
+     follow-ups. · Target: zero forgotten follow-ups
+   - Reviews · Review Automation · Automatically request reviews after
+     completed services. · Target: every customer asked
+   - E-commerce · E-commerce AI Support · Answer product questions, assist
+     customers and automate order communication. · Target: 60%+ tickets self-served
+   - Internal operations · Internal Operations · Automate repetitive
+     administrative workflows. · Target: hours a week given back
+  Each card: mini animated flow diagram, "View solution →".
+  Links: Explore all solutions → | Or browse by industry →
+  EFFECTS: hover lifts card, shows amber glow border, reveals three typical
+        potential impacts, and speeds up the mini flow; filter changes on the
+        Solutions page reflow with a FLIP glide animation.
+
+05b BUILD YOUR STACK
+  H2: Two taps to a starting point.
+  Lead: Pick your industry and the one thing you want fixed. We show the
+        website and automations we would start with.
+  Step 1 · Your industry (chips) · Step 2 · Main goal (More bookings, Capture
+        and follow up leads, Answer customers 24/7, Stop chasing by hand, Less
+        admin, More reviews).
+  Result: "Your recommended stack" (badge: Rule-based · not a quote):
+        00 AI website for <industry> + top three solutions.
+  CTA: Get a custom version of this for your business →
+
+06 CASE STUDIES (teaser)
+  H2: We measure the work we remove.
+  Lead: The scenarios below are illustrative: realistic engagements with target
+        ranges, marked as such. Real client numbers appear here only when they
+        come from the client's own dashboards and are approved for publishing.
+  Cards:
+   - Dental practice · Healthcare · United Kingdom · Illustrative scenario
+       Problem: Leads were arriving outside business hours and follow-up was inconsistent.
+       Built: AI website + lead qualification + automated booking + reminders.
+       Result: Faster lead response, day and night · Hours a week of admin removed from reception
+   - Plumbing company · Home services · Australia · Illustrative scenario
+       Problem: Quotes took one to two days to send, and jobs went to whoever replied first.
+       Built: Photo intake + AI quote draft + job scheduling + invoicing + review request.
+       Result: Under an hour from enquiry to quote sent · Same day invoices, every time
+   - Online homeware store · E-commerce · United Arab Emirates · Illustrative scenario
+       Problem: The support inbox was mostly order-status questions, answered by hand a day later.
+       Built: AI support with live order lookup + proactive shipping updates + escalation + review flow.
+       Result: Most tickets resolved without a human · Seconds pre-sale answers, 24/7
+  EFFECTS: reveal on scroll; numeric metrics count up on the detail pages.
+
+07 PROCESS
+  H2: From business problem to working system.
+  Lead: Usually three to five weeks. You see the system handle real cases before it goes live.
+  01 Discover — Understand your business, bottlenecks, customers and existing tools. OUTPUT · workflow map
+  02 Design — Map the ideal customer and operational workflow. OUTPUT · one-page plan, fixed price
+  03 Build — Create the website, automations and integrations in accounts you own. OUTPUT · working system
+  04 Test — Test edge cases, data flow and user experience with your real scenarios. OUTPUT · sign-off checklist
+  05 Launch & optimize — Launch, measure and continuously improve. OUTPUT · monthly numbers review
+  EFFECTS: the timeline line draws itself and stages appear one by one as the
+        section scrolls into view; horizontal on desktop, vertical on mobile.
+
+08 INTEGRATIONS
+  H2: We connect the tools your business already uses.
+  Lead: Your tools shouldn't work in isolation. We wire them around your
+        business rather than replacing them.
+  Hub: YOUR BUSINESS — one connected workflow, ringed by CRM, Calendar,
+        WhatsApp, Email, Forms, Payments, Analytics, AI models, Databases, Internal tools.
+  EFFECTS: slow rotating dashed ring; integration tiles highlight on hover.
+
+09 TRUST
+  H2: Proof you can check, not claims you have to take on faith.
+  Principles: Numbers come from your dashboards · You own every account ·
+        You talk to the builder.
+  Metrics: — Automations deployed (published when verified) · — Countries
+        served (published when verified) · 24/7 Automated workflows (by design).
+  Industry bar: Healthcare, Fitness, Salons and beauty, Home services,
+        E-commerce, Professional services, Education, Local services.
+  Testimonial slot: policy text until a real quote is approved.
+  EFFECTS: metrics pop in; industry chips show a tooltip on hover with the
+        usual leak and the solution we start with (target, not a result).
+
+09b WHAT IT COULD BE WORTH (ROI calculator, modelled)
+  H2: Put your own numbers in.
+  Inputs: currency, new enquiries per month, enquiries that become customers
+        now (%), average value of one customer, hours per week on repetitive
+        admin, cost of one hour. Assumptions (editable): share of admin hours
+        automatable (60%), lift in conversion from instant replies (15%).
+  Outputs: hours given back / month, admin cost removed / month, extra
+        customers / month, extra revenue / month, each with its formula.
+  Note: Modelled estimate from your inputs and the assumptions above. Not a
+        forecast or a guarantee.
+  CTA: Want a tailored version? Book a call →
+
+10 FINAL CTA
+  H2: Your next automation might be hiding in your daily routine.
+  Copy: Tell us what takes too much time. We'll show you what can be automated.
+  Buttons: Book a Free Strategy Call → | Explore Solutions
+  EFFECTS: soft amber pulse behind the primary button; radial glow in the band.
+
+Site-wide: sticky header that compacts on scroll; light/dark toggle (dark
+default); "Ask us" AI assistant (answers only from site content; rule-based
+fallback without a backend); sticky bottom CTA on mobile with hint "Free
+30-min strategy call · we map your automation roadmap"; exit-intent offer
+"Get a free 5-minute automation audit" (website + email), desktop, once per
+session; "Reduce motion" switch in the footer; OS reduced-motion respected.
+
+
+SOLUTIONS PAGE (solutions.html)
+-------------------------------
+H1: Solutions built for real business problems.
+Lead: Start with a proven system or let us design one around your workflow.
+      Filter by your industry or by the job you need done.
+Sticky filters — Industry: All, Healthcare, Fitness, Home Services,
+      E-commerce, Professional Services, Education, Other.
+      Use case: All, Lead Generation, Appointment Booking, Customer Support,
+      Follow-Up, Internal Operations, Reviews, Sales, CRM. Counter "n of 8".
+Empty state: No packaged solution matches both filters yet. Describe your
+      workflow and we will design one around it.
+Closing CTA: Not sure which one fits? Most businesses need a mix of two.
+      Describe your day and we'll map the flow that fits. → Book a Free
+      Strategy Call | Browse by industry
+EFFECTS: filter chips; FLIP reflow; hover outcomes + mini flow; deep links
+      ?industry= and ?use=.
+Not built on purpose: a Country filter (every solution is available in every
+      region, so the filter would never change the result).
+
+
+SOLUTION DETAIL (solution.html?id=…) — product-style template
+-------------------------------------------------------------
+Hero: category eyebrow, name, tagline, Book a Free Strategy Call →, Explore
+      Solutions, tool badges. Right: "The system" panel with the full flow
+      diagram and a ▶ Play button; hover a step for what happens there.
+01 The problem · 02 What's included (feature cards) · 03 How it works
+      (numbered steps) · 04 Expected impact (three metrics, each labelled
+      "Typical potential impact", plus a note that actual numbers come from
+      the client's own dashboards) · 05 Related case studies.
+CTA: Want this running in your business? Tell us how it works today. We'll
+      map this system onto your tools and give you a fixed price.
+
+Example — AI Booking Website
+  Tagline: Turn website visitors into qualified appointments without your
+      team managing every conversation.
+  Flow: Visitor → AI website → Qualification → Calendar → Confirmation →
+      Reminder → Follow-up
+  Included: AI website · Qualification · Calendar sync · Confirmations and
+      reminders · CRM record · Review request
+  Impact: 24/7 lead response availability · One workflow from visitor to
+      appointment · Fewer no-shows (reminders and easy rescheduling)
+  Tools: Cal.com, WhatsApp Business, Google Calendar, CRM or Sheets
+
+
+CASE STUDIES (case-studies.html and case-study.html?id=…)
+--------------------------------------------------------
+H1: We measure the work we remove.
+Lead: Each study follows the same shape: the challenge, the workflow before,
+      the system we built, and the results. Open one to see the full
+      automation flow.
+Note: The studies below are illustrative scenarios with target ranges. They
+      are marked as such on every card. Verified client results, approved for
+      publishing, replace them as engagements complete.
+
+Detail template: 01 Overview (client type, industry, location, duration) ·
+      02 The challenge · 03 Before · 04 What we built (+ linked solutions) ·
+      05 Automation flow (diagram, Play, hover tips) · 06 Results (three big
+      metrics with their basis) · 07 Before vs after (drag slider) ·
+      08 The takeaway.
+CTA: Want to build a system like this? Bring the part of your day that looks
+      like this one. We'll show you the flow that removes it. → Book a
+      Strategy Call | More case studies
+
+Example — Dental practice (Healthcare, United Kingdom, 4 weeks, illustrative)
+  Challenge: one receptionist covering phone, front desk and billing; calls
+      during treatments went to voicemail; evening enquiries answered next
+      morning; no reminders; WhatsApp on the principal's personal phone.
+  Before: Patient calls → voicemail → callback next morning · Website form →
+      inbox → replied when quiet · No reminders → daily no-shows · WhatsApp on a
+      personal phone, nothing logged.
+  Built: AI website answers hours, prices and prep questions instantly ·
+      Qualification collects treatment and urgency, then offers real slots ·
+      Booking lands on the right dentist's calendar · Reminders at 24 h and 2 h
+      with a reschedule link · Missed call → automatic text with the booking
+      link · Review request 2 hours after each visit.
+  Results (targets): 35% faster lead response · 12 hrs per week of admin
+      removed · 20–30% fewer no-shows.
+  Takeaway: Reception was never the problem. The gap between a patient's
+      interest and a human reply was.
+EFFECTS: sections reveal as you scroll with a rail that draws down the left
+      on wide screens; metrics count up and pop in; before/after slider;
+      diagram Play and tooltips.
+Optional (not built): 30–60 s video summary at the top — add a <video> or
+      embed above 01 Overview when you record one.
+
+
+INDUSTRIES (industries.html)
+----------------------------
+H1: Find your business. See where it leaks.
+Lead: Every industry has one or two places where work stalls waiting for a
+      person. These are the ones we see most, and the systems that fix them.
+Cards: Healthcare · Fitness · Salons and beauty · Home services · E-commerce ·
+      Professional services · Education · Local services — each with who it
+      is for, "Where it leaks", and links to the recommended solutions.
+CTA: Not on the list? If your business answers customers, books time or moves
+      information between tools, we can automate part of it.
+
+
+BOOKING (book.html)
+-------------------
+H1: Let's find the work your business shouldn't be doing manually.
+Lead: In a short strategy call, we'll understand your current workflow,
+      identify automation opportunities, and outline what a practical solution
+      could look like.
+What we'll discuss: 01 Business workflow audit · 02 Automation opportunities ·
+      03 Recommended next steps · 04 Rough project scope (an honest range for
+      cost and timeline, or an honest "not yet").
+Meeting types: 30 min Strategy call (Calendly) · 45 min Deep dive (link when
+      configured). "Times are shown in your time zone: <detected zone>".
+Explainer above the calendar: Pick a time → We audit your process → You get a
+      custom automation plan.
+Calendar: Calendly inline, themed to the site, hides event details and the
+      cookie banner; confirmation and reminder emails from Calendly.
+After booking: "Booked. Here is what happens next." with three steps.
+Prefer to write first? Email us · WhatsApp · Contact form.
+EFFECTS: animated explainer flow; success panel with a pop-in tick.
+
+
+ABOUT (about.html)
+------------------
+H1: Technology should remove complexity, not create more of it.
+Lead: DS Agency builds the systems large companies take for granted, sized and
+      priced for businesses with two, five or twenty people.
+Side: Fewer hand-offs. Faster answers. Tools that talk to each other.
+Sections: Why we exist · The problem we solve · How we choose technology
+      (boring where possible; your accounts, always; AI with limits;
+      everything logged) · Expertise (AI agents; workflow automation and
+      integrations; real-time systems; live reporting) · Where we work · What
+      we will not do (invent metrics; lock you in; sell automation you do not need).
+CTA: Talk to the person who builds it. There is no sales team.
+EFFECTS: soft background shapes with scroll parallax; sections fade in.
+
+
+CONTACT (contact.html)
+----------------------
+H1: Tell us what you're trying to improve.
+Lead: A sentence or two is enough. We usually respond within 24 hours.
+Form: Name · Work email · Company · Country · Website (optional) · Industry ·
+      What would you like to automate? · Message. Button: Start the
+      Conversation →. Fine print: We usually respond within 24 hours.
+Direct: email, WhatsApp (when set), Book a call instead.
+What happens next: reply within 24 hours from the person who would build your
+      system · if it fits, a 30-minute call with a written roadmap · no
+      newsletter, no drip campaign.
+EFFECTS: focus glow on fields; inline validation; loading state on the
+      button; success message slides in; hidden fields (source page, time zone)
+      ready for CRM automation.
+
+
+TECHNICAL NOTES
+---------------
+- Static site, no build. Config in site.config.js; catalog content in data.js.
+- Booking: Calendly (calendly.url). Cal.com supported as fallback.
+- Chat: chat.js → /api/chat (Vercel function, Groq key server-side) with
+  rule-based fallback. dev-server.py proxies locally.
+- Hooks: contact form fields → any endpoint (Web3Forms/Formspree/n8n webhook);
+  Calendly event_scheduled message → success state (and a webhook on the
+  Calendly side for reminder sequences and post-call surveys).
+- Deployed: GitHub Pages (static) at https://saikiranreddy18.github.io/ds_agency/
+  Vercel import pending for the chat backend.
+- Deliberately not built: animated counters with invented totals, client
+  logo wall, "recent wins" ticker, country filter.

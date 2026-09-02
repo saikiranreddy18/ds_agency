@@ -5,7 +5,7 @@
   const page = document.body.dataset.page || "";
   const name = S.name || "[Agency name]";
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.getAttribute("data-motion") === "reduced";
 
   /* ---------------------------------------------------------------
      Workflow rail renderer (shared component)
@@ -115,10 +115,20 @@
       </div>
       <div class="bottom">
         <span>© ${new Date().getFullYear()} ${esc(name)}</span>
-        <nav aria-label="Legal"><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a></nav>
+        <nav aria-label="Legal"><a href="legal.html#privacy">Privacy</a><a href="legal.html#terms">Terms</a><button class="motion-btn" type="button" aria-pressed="false">Reduce motion</button></nav>
       </div>
     </div>`;
   document.body.append(foot);
+
+  /* No-animation mode: mirrors the OS reduced-motion setting, remembered in this browser. */
+  document.querySelectorAll(".motion-btn").forEach((b) => {
+    const on = document.documentElement.getAttribute("data-motion") === "reduced";
+    b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Enable motion" : "Reduce motion";
+    b.addEventListener("click", () => {
+      try { localStorage.setItem("motion", on ? "full" : "reduced"); } catch (e) { /* ignore */ }
+      location.reload();
+    });
+  });
 
   if (!["book", "contact"].includes(page)) {
     const sticky = document.createElement("div");
@@ -159,6 +169,7 @@
       <span class="cat">${esc(s.cat)}</span>
       <h3>${esc(s.name)}</h3>
       ${s.badge ? `<span class="badge accent" style="align-self:flex-start">${esc(s.badge)}</span>` : ""}
+      <ul class="peek" aria-label="Typical potential impact">${s.impact.slice(0, 3).map(([b, t]) => `<li><strong>${esc(b)}</strong> · ${esc(t)}</li>`).join("")}</ul>
       <p>${esc(s.outcome)}</p>
       ${renderFlow(s.flow.slice(0, s.size === "tall" ? 7 : 4), { horizontal: true })}
       <span class="more">View solution →</span>
@@ -218,6 +229,8 @@
     const what = el.dataset.render;
     if (what === "hero-flow") el.innerHTML = renderFlow(D.heroFlow);
     if (what === "hero-3d") renderHero3D(el);
+    if (what === "industry-bar") el.innerHTML = D.industries.map((i) => { const s = DATA_BY_ID.solution(i.sols[0]); return `<a class="ib" href="industries.html#${i.id}">${esc(i.name)}<span class="tipbox" role="tooltip"><b>Where it leaks</b>${esc(i.pain)}${s ? ` <b style="margin-top:6px">We start with</b>${esc(s.name)} · ${esc(s.badge || "")}` : ""}</span></a>`; }).join("");
+    if (what === "explainer") el.innerHTML = renderFlow([["cal", "Pick a time"], ["ai", "We audit your process"], ["doc", "You get a custom automation plan"]], { horizontal: true });
     if (what === "catalog-preview") el.innerHTML = D.solutions.map((s) => solCard(s)).join("");
     if (what === "catalog") el.innerHTML = D.solutions.map((s) => solCard(s)).join("");
     if (what === "cases") el.innerHTML = D.cases.map(caseCard).join("");
@@ -436,7 +449,7 @@
         <section><h2>How it works</h2><div class="steps">${s.how.map(([b, t]) => `<div class="hstep"><div><b>${esc(b)}</b><span>${esc(t)}</span></div></div>`).join("")}</div></section>
         <section>
           <h2>Expected impact</h2>
-          <div class="impact">${s.impact.map(([b, t]) => `<div class="metric"><b>${esc(b)}</b><span>${esc(t)}</span><small>Typical potential impact</small></div>`).join("")}</div>
+          <div class="impact reveal">${s.impact.map(([b, t]) => `<div class="metric"><b>${esc(b)}</b><span>${esc(t)}</span><small>Typical potential impact</small></div>`).join("")}</div>
           <p class="note" style="margin-top:var(--s2)">Typical potential impact. Ranges reflect how this kind of workflow usually performs. We report your actual numbers from your own dashboards once the system is live.</p>
         </section>
         ${related.length ? `<section><h2>Related case studies</h2><div class="cases">${related.map(caseCard).join("")}</div></section>` : ""}
@@ -475,7 +488,7 @@
         <section><h2>What we built</h2><div class="ba after"><h3>The new system</h3><ul>${c.after.map((b) => `<li>${esc(b)}</li>`).join("")}</ul></div>
           <div class="tags" style="margin-top:var(--s2)">${(c.solutions || []).map((sid) => { const s = DATA_BY_ID.solution(sid); return s ? `<a class="badge" href="solution.html?id=${s.id}" style="text-decoration:none">${esc(s.name)} →</a>` : ""; }).join("")}</div></section>
         <section><h2>Automation flow</h2><div class="panel" style="max-width:620px"><div class="panel-head"><span class="live">Live flow</span><span>${c.flow.length} steps · <button class="replay" type="button" data-replay>▶ Play</button></span></div>${renderFlow(c.flow, { big: true })}<p class="panel-foot">Hover a step for what happens there.</p></div></section>
-        <section><h2>Results</h2><div class="impact">${c.metrics.map(([b, t, basis]) => `<div class="metric"><b data-count>${esc(b)}</b><span>${esc(t)}</span><small>${esc(basis)}</small></div>`).join("")}</div></section>
+        <section><h2>Results</h2><div class="impact reveal">${c.metrics.map(([b, t, basis]) => `<div class="metric"><b data-count>${esc(b)}</b><span>${esc(t)}</span><small>${esc(basis)}</small></div>`).join("")}</div></section>
         <section><h2>Before vs after</h2>
           <div class="ba-slider" style="--pos:50%">
             <div class="pane before"><h3>Before · manual</h3><ul>${c.before.map((b) => `<li>${esc(b)}</li>`).join("")}</ul></div>
@@ -507,6 +520,7 @@
       io.unobserve(e.target);
     });
   }, { rootMargin: "0px 0px -8% 0px" }) : null;
+  document.querySelectorAll(".numbered > section").forEach((s) => s.classList.add("reveal"));
   document.querySelectorAll(".reveal, [data-count]").forEach((el) => (io ? io.observe(el) : el.classList.add("in")));
 
   function countUp(el) {
@@ -536,14 +550,25 @@
     const state = { industry: "all", use: "all" };
     const count = bar.querySelector(".count");
     const empty = document.querySelector(".catalog-empty");
+    // FLIP reflow: cards glide to their new grid position instead of jumping.
     const apply = () => {
+      const all = Array.from(cards());
+      const first = new Map(all.map((c) => [c, c.hidden ? null : c.getBoundingClientRect()]));
       let n = 0;
-      cards().forEach((c) => {
+      all.forEach((c) => {
         const ok = (state.industry === "all" || c.dataset.industry.split(" ").includes(state.industry)) && (state.use === "all" || c.dataset.use.split(" ").includes(state.use));
-        c.classList.toggle("out", !ok);
-        if (ok) { c.hidden = false; n++; } else { setTimeout(() => { if (c.classList.contains("out")) c.hidden = true; }, 260); }
+        c.hidden = !ok; c.classList.remove("out"); if (ok) n++;
       });
-      if (count) count.textContent = n + " of " + cards().length;
+      if (!reduced) {
+        all.forEach((c) => {
+          if (c.hidden) return;
+          const f = first.get(c), l = c.getBoundingClientRect();
+          if (!f) { c.classList.add("enter"); requestAnimationFrame(() => requestAnimationFrame(() => c.classList.remove("enter"))); return; }
+          const dx = f.left - l.left, dy = f.top - l.top;
+          if (dx || dy) { c.style.transition = "none"; c.style.transform = `translate(${dx}px, ${dy}px)`; requestAnimationFrame(() => requestAnimationFrame(() => { c.style.transition = ""; c.style.transform = ""; })); }
+        });
+      }
+      if (count) count.textContent = n + " of " + all.length;
       if (empty) empty.hidden = n > 0;
     };
     bar.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => {

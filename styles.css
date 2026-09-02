@@ -813,3 +813,101 @@ form.contact .fine { font-size: 0.8rem; color: var(--muted); margin: 0; }
 
 /* sticky cta hint */
 .sticky-cta .hint { display: block; text-align: center; font-family: var(--mono); font-size: 0.64rem; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+
+/* ==================================================================
+   Ion layer: the remaining effects from the brief
+================================================================== */
+/* section dividers: a slow, low-contrast light moving along the rule */
+.block.rule { position: relative; }
+.block.rule::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px; pointer-events: none; opacity: .55;
+  background: linear-gradient(90deg, transparent 0%, rgba(242,181,68,.55) 50%, transparent 100%); background-size: 40% 100%; background-repeat: no-repeat; background-position: -40% 0;
+  animation: shimmer 9s linear infinite; }
+@keyframes shimmer { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+
+/* problem cards: icon pops in as the row reveals */
+.problem .icon { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line-2); display: grid; place-items: center; color: var(--accent); margin-bottom: 12px; opacity: 0; transform: scale(.6) rotate(-8deg); transition: transform .5s var(--ease), opacity .5s; transition-delay: calc(var(--i) * 90ms + 150ms); }
+.problem .icon svg { width: 17px; height: 17px; }
+.problems.in .problem .icon { opacity: 1; transform: none; }
+
+/* services: lift + thin glow border */
+.service:hover { box-shadow: 0 0 0 1px rgba(242,181,68,.45), 0 18px 50px -20px rgba(242,181,68,.35); border-color: rgba(242,181,68,.45); }
+
+/* catalog cards: hover reveals outcomes, speeds the mini flow; glow border */
+.sol .peek { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .35s var(--ease), opacity .3s; margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.sol .peek li { font-size: 0.82rem; color: var(--accent-text); padding-left: 14px; position: relative; }
+.sol .peek li::before { content: ""; position: absolute; left: 0; top: 9px; width: 7px; height: 1px; background: var(--accent); }
+.sol:hover .peek, .sol:focus-visible .peek { max-height: 120px; opacity: 1; }
+.sol:hover { box-shadow: 0 0 0 1px rgba(242,181,68,.35), 0 18px 50px -20px rgba(242,181,68,.3); }
+.sol:hover .flow.h { --dur: 4s; }
+.sol.enter { opacity: 0; transform: scale(.96); }
+
+/* process timeline draws itself */
+.timeline::before { transform: scaleX(0); transform-origin: left center; transition: transform 1.6s var(--ease); }
+.timeline.in::before { transform: scaleX(1); }
+.timeline .stage { opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease), transform .5s var(--ease); transition-delay: calc(var(--i) * 260ms + 200ms); }
+.timeline.in .stage { opacity: 1; transform: none; }
+@media (max-width: 900px) { .timeline::before { transform: scaleY(0); transform-origin: top center; } .timeline.in::before { transform: scaleY(1); } }
+
+/* industry trust bar with tooltips */
+.industry-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--s3); }
+.industry-bar .ib { position: relative; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 0.88rem; color: var(--text-2); background: var(--bg-1); text-decoration: none; transition: border-color .2s, color .2s; }
+.industry-bar .ib:hover, .industry-bar .ib:focus-visible { border-color: var(--accent); color: var(--text); }
+.industry-bar .ib .tipbox { position: absolute; left: 0; bottom: calc(100% + 8px); width: 260px; padding: 10px 12px; border-radius: var(--r); background: var(--bg-3); border: 1px solid var(--line-2); color: var(--text-2); font-size: 0.8rem; line-height: 1.45; opacity: 0; transform: translateY(4px); transition: opacity .18s, transform .18s; pointer-events: none; z-index: 5; }
+.industry-bar .ib .tipbox b { display: block; font-family: var(--mono); font-size: 0.62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-text); margin-bottom: 4px; }
+.industry-bar .ib:hover .tipbox, .industry-bar .ib:focus-visible .tipbox { opacity: 1; transform: none; }
+
+/* final CTA: pulse behind the primary button */
+.cta-band .btn.primary { position: relative; }
+.cta-band .btn.primary::before { content: ""; position: absolute; inset: -4px; border-radius: 999px; box-shadow: 0 0 0 0 rgba(242,181,68,.55); animation: ctaPulse 2.6s ease-out infinite; pointer-events: none; }
+@keyframes ctaPulse { 0% { box-shadow: 0 0 0 0 rgba(242,181,68,.55); } 70% { box-shadow: 0 0 0 18px rgba(242,181,68,0); } 100% { box-shadow: 0 0 0 0 rgba(242,181,68,0); } }
+
+/* case-study story: rail draws as you scroll, sections reveal, metrics pop */
+.numbered { position: relative; }
+.numbered::before { content: ""; position: absolute; left: -22px; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 0 / 100% 0%, var(--line); }
+@supports (animation-timeline: view()) {
+  .numbered::before { animation: rail linear both; animation-timeline: view(); animation-range: entry 10% exit 90%; }
+  @keyframes rail { from { background-size: 100% 0%; } to { background-size: 100% 100%; } }
+}
+@media (max-width: 1360px) { .numbered::before { display: none; } }
+.impact .metric, .metrics .metric { opacity: 0; transform: translateY(10px) scale(.97); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.impact.in .metric, .metrics.in .metric { opacity: 1; transform: none; }
+.impact.in .metric:nth-child(2), .metrics.in .metric:nth-child(2) { transition-delay: .12s; }
+.impact.in .metric:nth-child(3), .metrics.in .metric:nth-child(3) { transition-delay: .24s; }
+
+/* booking explainer above the calendar */
+.explainer { margin-bottom: var(--s3); }
+.explainer .flow.h { gap: 10px; }
+.explainer .flow.h .node { font-family: var(--display); font-size: 0.9rem; font-weight: 700; padding: 10px 14px; background: var(--bg-1); border-color: var(--line-2); }
+.explainer .flow.h .link { width: 22px; }
+
+/* about: soft background shapes with parallax */
+.shapes { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.shapes i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .12; }
+.shapes i:nth-child(1) { width: 420px; height: 420px; right: -120px; top: 40px; background: var(--accent); }
+.shapes i:nth-child(2) { width: 300px; height: 300px; left: -80px; top: 60%; background: #4f6cff; opacity: .08; }
+@supports (animation-timeline: scroll()) {
+  .shapes i { animation: parallax linear both; animation-timeline: scroll(); }
+  .shapes i:nth-child(2) { animation-direction: reverse; }
+  @keyframes parallax { from { transform: translateY(0); } to { transform: translateY(-160px); } }
+}
+.page-head.with-shapes { position: relative; }
+.page-head.with-shapes .wrap { position: relative; z-index: 1; }
+
+/* contact: success slides in */
+form.contact .status.ok { animation: slideIn .45s var(--ease); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+/* motion switch (footer) */
+.motion-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.motion-btn:hover { color: var(--accent-text); }
+
+/* site-level no-animation mode: mirrors the OS reduced-motion setting */
+:root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after { animation: none !important; transition: none !important; }
+:root[data-motion="reduced"] .reveal, :root[data-motion="reduced"] .kinetic .w, :root[data-motion="reduced"] .timeline .stage, :root[data-motion="reduced"] .problem .icon, :root[data-motion="reduced"] .impact .metric, :root[data-motion="reduced"] .metrics .metric { opacity: 1; transform: none; }
+:root[data-motion="reduced"] .timeline::before { transform: none; }
+:root[data-motion="reduced"] #halo { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .block.rule::before, .cta-band .btn.primary::before, .shapes i, .numbered::before { animation: none !important; }
+  .timeline::before { transform: none; } .timeline .stage, .problem .icon, .impact .metric, .metrics .metric { opacity: 1; transform: none; transition: none; }
+  .sol .peek { transition: none; }
+}
