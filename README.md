@@ -52,6 +52,12 @@ Deliberately not built: animated counters with invented numbers, a "recent wins"
 
 Five SVG variations live in `brand/`; open `logos.html` to compare them on dark and light. Each uses `currentColor` for ink and fixed amber for the node. To adopt one site-wide, replace the `.logo .mark` CSS in `styles.css` with the chosen mark and update the favicon data URI in each page head.
 
+## Deployment
+
+- **Repository:** https://github.com/saikiranreddy18/ds_agency (branch `main`).
+- **GitHub Pages (live now):** https://saikiranreddy18.github.io/ds_agency/ — static only, so the chat widget runs in rule-based mode there.
+- **Vercel (for the AI chat backend):** import the repo at https://vercel.com/new, keep the defaults (no build command, output is the repo root), and add `GROQ_API_KEY` under Settings → Environment Variables. Every push to `main` then redeploys and `api/chat.js` runs as a serverless function. Optional: point a custom domain at the Vercel project.
+
 ## Run locally
 
 ```bash
