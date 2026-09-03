@@ -23,7 +23,7 @@
      PLUG IN: your automation can branch on the `source` field. */
   const SOURCES = {
     contact: "contact_page",
-    audit: "exit_intent_audit",
+    audit: "page_end_audit",
     heroAudit: "hero_audit",
     auditMobile: "mobile_engagement",
     workflow: "workflow_modal",

@@ -26,6 +26,7 @@ Forms are wired to n8n and verified end to end:
   Webhook (CORS for ds-agency.vercel.app, the GitHub Pages site and localhost) → Normalize submission → in parallel: Gmail send (credential "Gmail account 2"; 3 retries; continue on fail) and insert into the **"DS Agency leads" data table** (so nothing is lost if mail fails).
 - **Notification address:** `dkai3782@gmail.com`, set in the "Normalize submission" node (`notify_to`). Reply-to is the visitor's email, so replying in Gmail answers them directly. Subjects: `[DS Agency] <source> · <email>`, prefixed `[TEST]` while `testMode` is on.
 - **Google Sheet:** a "Append row to Google Sheet" step (added in the n8n editor on 2026-09-03) appends every submission to the "Untitled spreadsheet" (Sheet1) after the data table insert. It was set to "append or update" with no matching column and failed on every run; it is now a plain append with auto-mapped columns, retries, and continue-on-fail. Rename the spreadsheet freely; the node references it by ID.
+- **Backup inbox:** if the webhook is down or errors, the relay emails the same fields through FormSubmit to `saikiranreddytallapureddy@gmail.com` (subject ends with "(backup channel)"). FormSubmit sent that inbox a one-time "Activate Form" email on 2026-09-03; click it once. Change the inbox with the `FORM_BACKUP_EMAIL` env var on Vercel. Test the path with `POST /api/form?backup=1`.
 - **Relay:** if a direct post to the webhook fails in the browser (CORS on a preview or sister domain such as ds-agency-in.vercel.app), the site retries through `/api/form` (`api/form.js`, same origin), which forwards the body to the webhook with the visitor's user agent. Set `FORM_WEBHOOK_URL` on Vercel to point the relay elsewhere. To make direct posts work from every domain instead, set the Webhook node's "Allowed Origins (CORS)" option in n8n to `*`.
 - The webhook rejects non-browser user agents (bot filter). Browsers are fine; when testing with curl, pass a browser User-Agent.
 - The original "Gmail account" credential in n8n has expired; reconnect it there if you ever want to switch back.
@@ -44,7 +45,7 @@ window.SITE = {
 Behaviour:
 
 - Regular forms (contact, workflow modal, every "Send me this by email" capture) post to `formEndpoint`.
-- The audit modal (exit-intent on desktop, scroll-depth plus time on touch) posts to `auditEndpoint` when set, otherwise `formEndpoint`.
+- The audit modal (pops up once the visitor reaches the end of the page; also opened by the top-hero field) posts to `auditEndpoint` when set, otherwise `formEndpoint`.
 - If `formEndpoint` is empty, every form falls back to opening the visitor's mail app with the fields in the body. Nothing is lost, but nothing reaches a webhook either.
 - Web3Forms also needs `<input type="hidden" name="access_key" value="…">` inside the contact form in `contact.html`; the other forms pass the key through the endpoint URL or you add the same hidden field where needed. n8n and Make webhooks need nothing extra.
 
@@ -66,8 +67,7 @@ Posted as `multipart/form-data` (not JSON). Web3Forms, Formspree, n8n and Make a
 |---|---|---|---|
 | `contact_page` | Contact form | `name, email, company, country, website, industry, automate, message, source_page` | Medium to high intent. Reply personally. |
 | `hero_audit` | Top hero field ("Get my free automation audit"), opens the audit modal with the website pre-filled | `website, email, bottleneck, message` | High intent. Same follow-up as the audit. |
-| `exit_intent_audit` | Audit modal, desktop | `website, email, bottleneck, message` | High intent. Fast follow-up with the 3-point audit. |
-| `mobile_engagement` | Audit modal, touch devices | same as above | Same as above. |
+| `page_end_audit` | Audit modal, pops up once the visitor reaches the end of the page (all devices, once per session) | `website, email, bottleneck, message` | High intent. Fast follow-up with the 3-point audit. |
 | `workflow_modal` | "Tell us your workflow" | `website, email, goal, message` | Medium intent. Send the recommended stack plus one case study. |
 | `build_stack_email` | Build Your Stack | `email, website, kind=stack, summary` (the stack names) | Low intent. Send the stack, invite to book. |
 | `roi_email_capture` | ROI calculator | `email, website, kind=roi, summary` (inputs and modelled outputs) | Low intent. Send the numbers, offer a walkthrough. |

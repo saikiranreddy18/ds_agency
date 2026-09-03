@@ -627,12 +627,12 @@
   /* ---------------------------------------------------------------
      Exit-intent offer (desktop, once per session, not on booking/contact)
   --------------------------------------------------------------- */
-  /* Audit offer: exit-intent on pointer devices, scroll-depth + time on touch devices. Once per session.
-     PLUG IN: submits to SITE.formEndpoint with source=exit_intent_audit (or source=mobile_engagement). */
+  /* Audit offer: pops up once the visitor reaches the end of the page (the closing CTA band or the footer
+     comes into view), once per session. Never early. The top-hero field opens the same form deliberately.
+     PLUG IN: submits to SITE.formEndpoint with source=page_end_audit (or hero_audit from the top field). */
   if (!["book", "contact"].includes(page)) {
     let shown = false; try { shown = sessionStorage.getItem("exitShown") === "1"; } catch (e) { /* ignore */ }
     const RT = S.responseTime || "24 hours";
-    const armed = Date.now() + 8000;
     const modal = document.createElement("div"); modal.className = "modal"; modal.id = "audit-modal"; modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true"); modal.setAttribute("aria-labelledby", "exit-title");
     modal.innerHTML = `<div class="box">
       <button class="close" type="button" aria-label="Close">×</button>
@@ -645,7 +645,7 @@
         <select name="bottleneck" aria-label="Biggest bottleneck right now"><option value="">Biggest bottleneck (optional)</option><option>Missed leads</option><option>Manual follow-up</option><option>Booking</option><option>Admin</option><option>Support</option><option>Not sure</option></select>
         <textarea name="message" rows="2" placeholder="Anything else? (optional)" aria-label="Message (optional)"></textarea>
         <input type="hidden" name="_subject" value="Free automation audit request">
-        <input type="hidden" name="source" value="exit_intent_audit">
+        <input type="hidden" name="source" value="page_end_audit">
         <input type="hidden" name="page" value="">
         <input type="hidden" name="timezone" value="${esc((() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })())}">
         <button class="btn primary" type="submit">Send me the audit <span class="arr">→</span></button>
@@ -682,14 +682,18 @@
     modal.querySelector(".close").addEventListener("click", close);
     modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-    if (window.matchMedia("(hover: hover)").matches) {
-      document.addEventListener("mouseout", (e) => { if (e.relatedTarget || e.clientY > 8 || Date.now() < armed) return; open("exit_intent_audit"); });
+    /* End-of-page trigger: the last CTA band (or the footer) scrolls into view -> open after a short beat. */
+    const endMark = document.querySelector(".cta-band") || document.querySelector("footer");
+    if (endMark && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some((en) => en.isIntersecting)) return;
+        io.disconnect();
+        setTimeout(() => { if (!document.body.classList.contains("modal-open")) open("page_end_audit"); }, 900);
+      }, { threshold: 0.35 });
+      io.observe(endMark);
     } else {
-      // Touch devices: after 25 s on the page and at least half of it scrolled.
-      const t0 = Date.now(); let deep = false;
-      const check = () => { const h = document.documentElement.scrollHeight - window.innerHeight; if (h > 0 && window.scrollY / h >= 0.5) deep = true; if (deep && Date.now() - t0 > 25000) { open("mobile_engagement"); window.removeEventListener("scroll", check); } };
+      const check = () => { const h = document.documentElement.scrollHeight - window.innerHeight; if (h > 0 && window.scrollY / h >= 0.92) { window.removeEventListener("scroll", check); open("page_end_audit"); } };
       window.addEventListener("scroll", check, { passive: true });
-      setTimeout(check, 26000);
     }
     modal.querySelector("form").addEventListener("submit", async (e) => {
       e.preventDefault();
