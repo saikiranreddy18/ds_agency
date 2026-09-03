@@ -361,6 +361,57 @@
       if (ind) ind.click(); if (goal) goal.click();
     }));
     render();
+
+    /* Stack canvas: build a stack by hand. Drag modules into "Your stack" (HTML5 drag and drop on
+       pointer devices) or tap a module to add/remove it (touch, keyboard). The summary is assembled
+       from each solution's first "typical potential impact" line, so it never invents outcomes.
+       "Use this as my starting point" opens the workflow modal with the modules pre-filled. */
+    const canvas = document.createElement("div");
+    canvas.className = "stack-canvas";
+    canvas.innerHTML = `
+      <div class="lbl">Or build it by hand</div>
+      <div class="canvas">
+        <div class="modules" aria-label="Available modules">
+          <span class="chip module base" aria-disabled="true" title="Every stack starts with the AI website">AI website <span class="x">base</span></span>
+          ${D.solutions.map((s) => `<button class="chip module" type="button" draggable="true" data-id="${s.id}" aria-pressed="false">${esc(s.name)} <span class="x" aria-hidden="true">+</span></button>`).join("")}
+        </div>
+        <div class="dropzone" data-empty="true" aria-label="Your stack" aria-live="polite"></div>
+      </div>
+      <p class="stack-summary"><b>Typical potential impact</b><span>Add a module to see what this stack is built to do.</span></p>
+      <div class="row"><button class="btn primary" type="button" data-stack-use disabled>Use this as my starting point <span class="arr">→</span></button><span class="fine" style="margin:0">Opens the workflow form with these modules filled in.</span></div>`;
+    cfg.append(canvas);
+    const zone = canvas.querySelector(".dropzone"), summary = canvas.querySelector(".stack-summary span"), useBtn = canvas.querySelector("[data-stack-use]");
+    let selected = [];
+    let stackTracked = false;
+    const renderCanvas = () => {
+      zone.innerHTML = selected.map((id) => { const s = DATA_BY_ID.solution(id); return s ? `<button class="chip module" type="button" data-id="${s.id}" aria-pressed="true" aria-label="Remove ${esc(s.name)}">${esc(s.name)} <span class="x" aria-hidden="true">×</span></button>` : ""; }).join("");
+      zone.dataset.empty = String(!selected.length);
+      canvas.querySelectorAll(".modules .module[data-id]").forEach((m) => m.setAttribute("aria-pressed", String(selected.includes(m.dataset.id))));
+      if (!selected.length) { summary.textContent = "Add a module to see what this stack is built to do."; useBtn.disabled = true; return; }
+      const lines = selected.map((id) => DATA_BY_ID.solution(id)).filter(Boolean).map((s) => s.outcome.replace(/\.$/, "").replace(/^./, (c) => c.toLowerCase()));
+      summary.textContent = "AI website + " + selected.length + " automation" + (selected.length > 1 ? "s" : "") + ". This stack is built to: " + lines.join("; ") + ". Ranges are targets, not measured results.";
+      useBtn.disabled = false;
+      if (!stackTracked) { stackTracked = true; if (window.DS && DS.track) DS.track("stack_configured", { modules: selected.length }); }
+    };
+    const toggle = (id) => { selected = selected.includes(id) ? selected.filter((x) => x !== id) : selected.concat(id); renderCanvas(); };
+    canvas.addEventListener("click", (e) => { const m = e.target.closest(".module[data-id]"); if (m) toggle(m.dataset.id); });
+    canvas.querySelectorAll(".modules .module[data-id]").forEach((m) => {
+      m.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", m.dataset.id); e.dataTransfer.effectAllowed = "copy"; m.classList.add("dragging"); });
+      m.addEventListener("dragend", () => m.classList.remove("dragging"));
+    });
+    zone.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; zone.classList.add("over"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+    zone.addEventListener("drop", (e) => { e.preventDefault(); zone.classList.remove("over"); const id = e.dataTransfer.getData("text/plain"); if (id && !selected.includes(id) && DATA_BY_ID.solution(id)) { selected = selected.concat(id); renderCanvas(); } });
+    useBtn.addEventListener("click", () => {
+      const names = ["AI website"].concat(selected.map((id) => (DATA_BY_ID.solution(id) || {}).name).filter(Boolean));
+      if (window.DS && DS.openWorkflow) DS.openWorkflow({ stack: names.join(" + "), message: "Starting point: " + names.join(" + ") + "." }, useBtn);
+      else location.href = "contact.html";
+    });
+    /* Keep the canvas in step with the recommended stack when a preset or chip pair is chosen. */
+    const origRender = render;
+    const syncCanvas = () => { if (state.industry && state.goal) { selected = Array.from(body.querySelectorAll(".stack a.item")).map((a) => (a.getAttribute("href").split("id=")[1] || "")).filter(Boolean); renderCanvas(); } };
+    cfg.querySelectorAll("[data-g] .chip, [data-preset]").forEach((c) => c.addEventListener("click", () => setTimeout(syncCanvas, 0)));
+    void origRender;
   }
 
   /* ---------------------------------------------------------------
@@ -383,9 +434,13 @@
         <div class="presets" data-presets="roi" aria-label="Example businesses"><span class="lbl">Try an example</span>${ROI_PRESETS.map(([k, l, v]) => `<button class="chip" type="button" data-preset="${k}" aria-pressed="false" title="${esc(presetTitle(v))}">${esc(l)}<span class="sr"> — ${esc(presetTitle(v))}</span></button>`).join("")}<span class="fine" style="flex-basis:100%;margin:6px 0 0">Example numbers only. Swap in your own.</span></div>
         <label>Currency <select name="cur"><option>$</option><option>£</option><option>€</option><option>₹</option><option>AED</option><option>A$</option><option>S$</option></select></label>
         <label>New enquiries per month <input type="number" name="leads" value="60" min="0"></label>
+        <div class="range-row"><input type="range" data-for="leads" min="0" max="500" step="5" value="60" aria-label="New enquiries per month, slider"></div>
         <label>Enquiries that become customers now (%) <input type="number" name="close" value="20" min="0" max="100"></label>
+        <div class="range-row"><input type="range" data-for="close" min="0" max="100" step="1" value="20" aria-label="Enquiries that become customers, slider"></div>
         <label>Average value of one customer <input type="number" name="value" value="200" min="0"></label>
+        <div class="range-row"><input type="range" data-for="value" min="0" max="5000" step="10" value="200" aria-label="Average value of one customer, slider"></div>
         <label>Hours per week on repetitive admin <input type="number" name="hours" value="10" min="0"></label>
+        <div class="range-row"><input type="range" data-for="hours" min="0" max="60" step="1" value="10" aria-label="Hours per week on repetitive admin, slider"></div>
         <label>Cost of one hour of that time <input type="number" name="rate" value="25" min="0"></label>
         <div class="assume">
           <div class="lbl"><span class="badge accent">Modelled</span> Assumptions you can change</div>
@@ -406,28 +461,68 @@
       </div>`;
     const g = (n) => parseFloat(roi.querySelector(`[name="${n}"]`).value) || 0;
     const fmt = (n) => n >= 1000 ? Math.round(n).toLocaleString() : (Math.round(n * 10) / 10).toLocaleString();
+    const FIELDS = ["cur", "leads", "close", "value", "hours", "rate", "autoShare", "lift"];
+    /* Outputs tween from their previous value (short, opacity-free) so the slider feels live; instant under reduced motion. */
+    const shown = {};
+    const setOut = (key, value, render) => {
+      const el = roi.querySelector(`[data-o="${key}"]`);
+      const from = shown[key] == null ? value : shown[key]; shown[key] = value;
+      if (reduced || from === value || !Number.isFinite(from)) { el.textContent = render(value); return; }
+      const t0 = performance.now();
+      const tick = (t) => { const p = Math.min(1, (t - t0) / 260); const v = from + (value - from) * (1 - Math.pow(1 - p, 3)); el.textContent = render(p < 1 ? v : value); if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    };
+    const syncRanges = () => roi.querySelectorAll('input[type="range"][data-for]').forEach((r) => {
+      const f = roi.querySelector(`[name="${r.dataset.for}"]`); if (!f) return;
+      r.value = f.value; r.style.setProperty("--fill", ((r.value - r.min) / (r.max - r.min) * 100) + "%");
+    });
     const calc = () => {
       const cur = roi.querySelector('[name="cur"]').value;
       const hours = g("hours") * 4.33 * (g("autoShare") / 100);
       const cost = hours * g("rate");
       const customers = g("leads") * (g("close") / 100) * (g("lift") / 100);
       const revenue = customers * g("value");
-      roi.querySelector('[data-o="hours"]').textContent = fmt(hours) + " h";
-      roi.querySelector('[data-o="cost"]').textContent = cur + " " + Math.round(cost).toLocaleString();
-      roi.querySelector('[data-o="customers"]').textContent = fmt(customers);
-      roi.querySelector('[data-o="revenue"]').textContent = cur + " " + Math.round(revenue).toLocaleString();
+      setOut("hours", hours, (v) => fmt(v) + " h");
+      setOut("cost", cost, (v) => cur + " " + Math.round(v).toLocaleString());
+      setOut("customers", customers, (v) => fmt(v));
+      setOut("revenue", revenue, (v) => cur + " " + Math.round(v).toLocaleString());
+      syncRanges();
     };
     const presetBtns = roi.querySelectorAll("[data-preset]");
     presetBtns.forEach((b) => b.addEventListener("click", () => {
       const p = ROI_PRESETS.find((x) => x[0] === b.dataset.preset); if (!p) return;
       Object.entries(p[2]).forEach(([k, v]) => { const f = roi.querySelector(`[name="${k}"]`); if (f) f.value = v; });
       presetBtns.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-      calc();
+      calc(); persist();
     }));
+    /* Remember the visitor's numbers in this browser; a shared link (?roi_…=) wins over the memory. */
+    const persist = () => { try { const o = {}; FIELDS.forEach((k) => { o[k] = roi.querySelector(`[name="${k}"]`).value; }); localStorage.setItem("roi:inputs", JSON.stringify(o)); } catch (e) { /* ignore */ } };
+    const applyValues = (o) => { FIELDS.forEach((k) => { if (o[k] != null && o[k] !== "") { const f = roi.querySelector(`[name="${k}"]`); if (f) f.value = o[k]; } }); };
+    const params = new URLSearchParams(location.search);
+    const fromUrl = {}; FIELDS.forEach((k) => { if (params.has("roi_" + k)) fromUrl[k] = params.get("roi_" + k); });
+    if (Object.keys(fromUrl).length) applyValues(fromUrl);
+    else { try { const saved = JSON.parse(localStorage.getItem("roi:inputs") || "null"); if (saved) applyValues(saved); } catch (e) { /* ignore */ } }
+    let roiUsed = false;
     roi.addEventListener("input", (e) => {
       if (e.target.closest(".mini-capture")) return;
+      if (e.target.type === "range" && e.target.dataset.for) { const f = roi.querySelector(`[name="${e.target.dataset.for}"]`); if (f) f.value = e.target.value; }
       presetBtns.forEach((x) => x.setAttribute("aria-pressed", "false"));
-      calc();
+      calc(); persist();
+      if (!roiUsed) { roiUsed = true; if (window.DS && DS.track) DS.track("roi_calculator_used"); }
+    });
+    /* Share: a link that reopens the calculator with these numbers. Copies to the clipboard, or shows the link to copy by hand. */
+    const share = document.createElement("div"); share.className = "share";
+    share.innerHTML = `<button class="btn sm ghost" type="button" data-roi-share>Share this estimate</button><input class="link" type="text" readonly aria-label="Shareable link" hidden><p class="status" role="status" aria-live="polite"></p>`;
+    roi.querySelector(".out .cta").after(share);
+    share.querySelector("[data-roi-share]").addEventListener("click", async () => {
+      const u = new URL(location.href.split("#")[0]);
+      FIELDS.forEach((k) => u.searchParams.set("roi_" + k, roi.querySelector(`[name="${k}"]`).value));
+      u.hash = "roi";
+      const link = share.querySelector(".link"), st = share.querySelector(".status");
+      link.value = u.toString(); link.hidden = false;
+      try { await navigator.clipboard.writeText(u.toString()); st.textContent = "Link copied. It reopens this calculator with your numbers."; }
+      catch (e) { link.select(); st.textContent = "Copy the link above to save or send this estimate."; }
+      if (window.DS && DS.track) DS.track("roi_shared");
     });
     calc();
   }
@@ -470,6 +565,7 @@
       modal.querySelector('[name="page"]').value = location.pathname + location.search;
       opener = document.activeElement;
       modal.classList.add("open"); document.body.classList.add("modal-open");
+      if (window.DS && DS.track) DS.track("audit_shown", { source });
       modal.querySelector("input").focus();
     };
     const close = () => {

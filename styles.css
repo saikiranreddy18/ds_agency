@@ -24,7 +24,34 @@
   --board: #15181d;
   --board-line: #23272e;
   --board-side: #0e1013;
+  --success: #2fbf71;
+  --success-ink: #08301c;
   color-scheme: dark;
+
+  /* ------------------------------------------------------------------
+     Colour system: how to change it later
+     The whole site keys off ONE primary hue (amber). To move the brand
+     to blue, teal or purple, change --accent, --accent-2, --accent-hover,
+     --accent-dim and --accent-text here (and the light-theme block
+     below); every button, glow, focus ring, chart line and badge follows.
+     Rules the tokens are built to keep:
+       - body text on background ≥ 4.5:1 (--text, --text-2, --muted)
+       - button label on --accent ≥ 3:1 (--accent-ink is near-black)
+       - --accent-text is a darker amber used ONLY for text on light
+         surfaces, because pure amber on white fails contrast
+     Semantic aliases (the names the brief asks for) map onto those tokens
+     so either vocabulary works in new CSS.
+  ------------------------------------------------------------------ */
+  --color-primary: var(--accent);
+  --color-primary-weak: var(--accent-dim);
+  --color-primary-text: var(--accent-text);
+  --color-bg: var(--bg-0);
+  --color-bg-alt: var(--bg-1);
+  --color-text: var(--text);
+  --color-text-muted: var(--muted);
+  --color-border: var(--line);
+  --color-success: var(--success);
+  --color-error: var(--danger);
 }
 :root[data-theme="light"] {
   --bg-0: #f5f6f8; --bg-1: #ffffff; --bg-2: #eef0f3; --bg-3: #e3e6eb;
@@ -114,6 +141,11 @@ section.block.tight { padding-top: clamp(var(--s5), 6vw, var(--s7)); padding-bot
 .btn.quiet { background: transparent; color: var(--text-2); padding: 0; min-height: 0; }
 .btn.quiet:hover { color: var(--accent-text); }
 .btn.sm { min-height: 40px; padding: 0 16px; font-size: 0.875rem; }
+/* Semantic variants: use sparingly (confirmations and destructive actions only). */
+.btn.success { background: var(--success); border-color: var(--success); color: var(--success-ink); }
+.btn.success:hover { filter: brightness(1.08); }
+.btn.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover { background: var(--danger); color: #fff; }
 .btn[aria-busy="true"] { color: transparent; pointer-events: none; }
 .btn[aria-busy="true"]::after {
   content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%;

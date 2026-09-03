@@ -40,7 +40,16 @@
     return "form_" + (document.body.dataset.page || "page");
   };
   const timezone = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
-  window.DS = Object.assign(window.DS || {}, { sources: SOURCES, getSourceForForm, timezone });
+  /* Analytics hook. Nothing is sent anywhere by default: listen for the "ds:track" event,
+     or define window.dataLayer (Google Tag Manager) and every event is pushed there too.
+     Events: qualifier_used, workflow_modal_opened, capture_sent, audit_shown, playground_used,
+     roi_calculator_used, roi_shared, stack_configured. */
+  const track = (event, props) => {
+    const detail = Object.assign({ event, page: location.pathname + location.search }, props || {});
+    try { document.dispatchEvent(new CustomEvent("ds:track", { detail })); } catch (e) { /* ignore */ }
+    if (Array.isArray(window.dataLayer)) window.dataLayer.push(detail);
+  };
+  window.DS = Object.assign(window.DS || {}, { sources: SOURCES, getSourceForForm, timezone, track });
 
   const nice = (k) => k.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
   const fixUrl = (v) => { const t = String(v || "").trim(); return t && !/^https?:\/\//i.test(t) ? "https://" + t : t; };
@@ -118,6 +127,7 @@
       const chip = e.target.closest(".chip[data-focus]"); if (!chip) return;
       const v = chip.dataset.focus;
       try { const u = new URL(location.href); u.searchParams.set("focus", v); history.replaceState(null, "", u); } catch (err) { /* ignore */ }
+      track("qualifier_used", { focus: v });
       applyFocus(v, true);
     });
   }
@@ -171,6 +181,7 @@
       <label>What takes too much time? <span class="opt">(optional)</span><textarea name="message" rows="3" placeholder="e.g. We get 30 WhatsApp enquiries a day and answer each one by hand."></textarea></label>
       <input type="hidden" name="_subject" value="Workflow request">
       <input type="hidden" name="source" value="workflow_modal">
+      <input type="hidden" name="stack" value="">
       <input type="hidden" name="page" value="">
       <button class="btn primary" type="submit">Send my workflow <span class="arr">→</span></button>
       <p class="status" role="status" aria-live="polite"></p>
@@ -184,11 +195,19 @@
   const firstField = wf.querySelector("input, select, textarea");
   let opener = null;
   const modalOpen = () => modal.classList.contains("open");
-  const openModal = (from) => {
+  const openModal = (from, prefill) => {
     opener = from || document.activeElement;
+    if (prefill) {
+      const stackF = wf.querySelector('[name="stack"]'), msgF = wf.querySelector('[name="message"]');
+      if (stackF) stackF.value = prefill.stack || "";
+      if (msgF && !msgF.value && prefill.message) msgF.value = prefill.message;
+    }
     modal.classList.add("open"); document.body.classList.add("modal-open");
+    track("workflow_modal_opened", { prefilled: !!(prefill && prefill.stack) });
     requestAnimationFrame(() => firstField.focus());
   };
+  /* Other scripts (site.js stack canvas) open the modal with context: DS.openWorkflow({stack, message}) */
+  window.DS.openWorkflow = (prefill, from) => openModal(from || null, prefill);
   const closeModal = () => {
     if (!modalOpen()) return;
     modal.classList.remove("open"); document.body.classList.remove("modal-open");
@@ -271,7 +290,8 @@
     const summary = summaryFor(kind, form);
     if (kind === "stack" && !summary) { setStatus(status, "Pick an industry and a goal first. Then we can send the stack.", "err"); return; }
     // PLUG IN: the automation endpoint receives kind, summary, page, timezone and the source tag from SOURCES.
-    await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, source: getSourceForForm(form) }, okText: "Done. We'll email this within " + RT + ".", btn, status });
+    const sent = await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, source: getSourceForForm(form) }, okText: "Done. We'll email this within " + RT + ".", btn, status });
+    if (sent) track("capture_sent", { source: getSourceForForm(form), kind });
   });
   document.addEventListener("input", (e) => { const t = e.target; if (t && t.classList && t.classList.contains("invalid")) t.classList.remove("invalid"); });
 
@@ -315,8 +335,11 @@
   /* ---------------------------------------------------------------
      Kinetic type on 2–3 key section headlines (word by word when in view)
   --------------------------------------------------------------- */
+  /* Triggers when the headline scrolls into view (not on load), once per session per headline.
+     data-kinetic="slow" gives a more relaxed timing (see conversion.css). */
   if (!reduced() && "IntersectionObserver" in window) {
-    const heads = document.querySelectorAll(".kinetic-on-view");
+    const seenKey = (h) => "kinetic:" + h.textContent.trim().slice(0, 40);
+    const heads = Array.from(document.querySelectorAll(".kinetic-on-view")).filter((h) => { try { return !sessionStorage.getItem(seenKey(h)); } catch (e) { return true; } });
     const kio = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
@@ -324,6 +347,7 @@
         const words = h.textContent.trim().split(/\s+/);
         h.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(" ");
         h.classList.add("kinetic", "in");
+        try { sessionStorage.setItem(seenKey(h), "1"); } catch (e) { /* ignore */ }
       });
     }, { threshold: 0.4 });
     heads.forEach((h) => kio.observe(h));
@@ -367,5 +391,91 @@
       rip.className = "tap-ripple"; rip.style.left = x + "px"; rip.style.top = y + "px";
       board.append(rip); setTimeout(() => rip.remove(), 1400);
     }, { passive: true });
+  }
+
+  /* ---------------------------------------------------------------
+     Playground: drag the automation flow. Exists so a visitor can
+     "feel" the system: move a step and the wiring follows; tap a step
+     to read what happens there. Static markup (nodes in default
+     positions) still reads fine without JS.
+     - Pointer events cover mouse, pen and touch; drag is constrained
+       to the container; a short pointerdown/up with no movement is a tap.
+     - Arrow keys move the focused step by 10px (keyboard users).
+     - Positions persist in localStorage ("pg:layout"); Reset clears them.
+  --------------------------------------------------------------- */
+  const pg = document.querySelector("[data-playground]");
+  const D = window.DATA || {};
+  if (pg && D.heroFlow) {
+    const STEPS = D.heroFlow;
+    const DEFAULT = [[14, 22], [40, 22], [66, 22], [86, 50], [66, 78], [40, 78], [14, 78]]; // percent of container
+    const svg = pg.querySelector(".pg-wires");
+    const info = pg.querySelector(".pg-info");
+    const resetBtn = pg.querySelector("[data-pg-reset]");
+    let layout = null;
+    try { const saved = JSON.parse(localStorage.getItem("pg:layout") || "null"); if (Array.isArray(saved) && saved.length === STEPS.length) layout = saved; } catch (e) { /* ignore */ }
+    if (!layout) layout = DEFAULT.map((p) => p.slice());
+    const nodes = STEPS.map(([icon, label, sub], i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "pg-node"; b.dataset.i = String(i);
+      b.setAttribute("aria-label", label + ". " + (sub || "") + " Drag to move, arrow keys to nudge.");
+      b.innerHTML = `<span class="ic" aria-hidden="true">${(D.icons && D.icons[icon]) || ""}</span><span><span>${esc(label)}</span><small>${esc(sub || "")}</small></span>`;
+      pg.insertBefore(b, pg.querySelector(".pg-bar"));
+      return b;
+    });
+    const place = (i) => { nodes[i].style.setProperty("--x", layout[i][0] + "%"); nodes[i].style.setProperty("--y", layout[i][1] + "%"); };
+    const centre = (i) => { const r = pg.getBoundingClientRect(); return [layout[i][0] / 100 * r.width, layout[i][1] / 100 * r.height]; };
+    const draw = () => {
+      const r = pg.getBoundingClientRect();
+      svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+      const pts = STEPS.map((_, i) => centre(i));
+      // Smooth curves between consecutive steps so the wiring reads as one flow.
+      let d = `M${pts[0][0]} ${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const cx = (x0 + x1) / 2; d += ` C${cx} ${y0}, ${cx} ${y1}, ${x1} ${y1}`; }
+      svg.innerHTML = `<path d="${d}"/><path class="live" d="${d}"/>`;
+    };
+    const save = () => { try { localStorage.setItem("pg:layout", JSON.stringify(layout)); } catch (e) { /* ignore */ } };
+    const clamp = (v) => Math.max(6, Math.min(94, v));
+    let used = false;
+    const markUsed = (how) => { if (used) return; used = true; track("playground_used", { how }); };
+    const select = (i) => {
+      nodes.forEach((n, k) => n.classList.toggle("active", k === i));
+      if (info) info.innerHTML = `<b>${esc(STEPS[i][1])}</b> · ${esc(STEPS[i][2] || "")} — step ${i + 1} of ${STEPS.length}`;
+    };
+    nodes.forEach((n, i) => {
+      place(i);
+      let drag = null;
+      n.addEventListener("pointerdown", (e) => {
+        if (e.button && e.button !== 0) return;
+        try { n.setPointerCapture(e.pointerId); } catch (err) { /* pointer already released or synthetic: drag still works via bubbling */ }
+        drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: layout[i][0], oy: layout[i][1], moved: false };
+        n.classList.add("drag");
+      });
+      n.addEventListener("pointermove", (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const r = pg.getBoundingClientRect();
+        const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+        if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+        layout[i] = [clamp(drag.ox + dx / r.width * 100), clamp(drag.oy + dy / r.height * 100)];
+        place(i); draw();
+      });
+      const end = (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        n.classList.remove("drag");
+        if (drag.moved) { save(); markUsed("drag"); } else { select(i); markUsed("tap"); }
+        drag = null;
+      };
+      n.addEventListener("pointerup", end); n.addEventListener("pointercancel", end);
+      n.addEventListener("keydown", (e) => {
+        const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        if (!k) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(i); } return; }
+        e.preventDefault();
+        const r = pg.getBoundingClientRect();
+        layout[i] = [clamp(layout[i][0] + k[0] * 10 / r.width * 100), clamp(layout[i][1] + k[1] * 10 / r.height * 100)];
+        place(i); draw(); save(); markUsed("keyboard");
+      });
+    });
+    if (resetBtn) resetBtn.addEventListener("click", () => { layout = DEFAULT.map((p) => p.slice()); nodes.forEach((_, i) => place(i)); draw(); try { localStorage.removeItem("pg:layout"); } catch (e) { /* ignore */ } if (info) info.textContent = "Layout reset. Tap a step to see what it does."; });
+    draw();
+    if ("ResizeObserver" in window) new ResizeObserver(draw).observe(pg); else window.addEventListener("resize", draw);
   }
 })();
