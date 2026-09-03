@@ -263,18 +263,22 @@
 
   /* Top hero: floating business owners around the headline (illustrated avatars, no real photos),
      six slots, cycling through the pool. The process is explained in the next section, so nothing here describes it. */
+  /* Photographs: Unsplash portraits (Unsplash Licence: free for commercial use, no attribution required).
+     Each entry: label, ring hue, Unsplash photo id, illustrated fallback used only if the photo fails to load.
+     To use your own clients' photos (with their permission), drop files in assets/owners/ and put the
+     path in the `photo` field instead of an id. */
+  const PHOTO = (p) => /^(https?:)?\/|^assets\//.test(p) ? p : "https://images.unsplash.com/photo-" + p + "?w=160&h=160&fit=crop&crop=faces&q=70&auto=format";
   const OWNERS = [
-    /* label, hue, avatar: skin, hair, shirt, hair style, extras */
-    ["Bakery owner",       28,  { skin: "#e8b48a", hair: "#2b1b12", shirt: "#d97706", style: "bun" }],
-    ["Gym owner",          200, { skin: "#8d5524", hair: "#111111", shirt: "#2563eb", style: "short", beard: true }],
-    ["Dental clinic",      160, { skin: "#f1c27d", hair: "#5a3a1a", shirt: "#0d9488", style: "long", glasses: true }],
-    ["Salon owner",        320, { skin: "#c68642", hair: "#1a1a1a", shirt: "#db2777", style: "long" }],
-    ["Restaurant owner",   10,  { skin: "#a0673f", hair: "#222222", shirt: "#dc2626", style: "cap" }],
-    ["Real estate agent",  260, { skin: "#ffdbac", hair: "#b5651d", shirt: "#7c3aed", style: "short", glasses: true }],
-    ["Plumbing business",  190, { skin: "#c58c5a", hair: "#3b2416", shirt: "#0284c7", style: "cap", beard: true }],
-    ["Coaching centre",    90,  { skin: "#f3d2b3", hair: "#777777", shirt: "#16a34a", style: "bun", glasses: true }],
-    ["Boutique owner",     340, { skin: "#d9a066", hair: "#2b1b12", shirt: "#e11d48", style: "long" }],
-    ["Physio clinic",      140, { skin: "#e0ac69", hair: "#111111", shirt: "#059669", style: "short" }],
+    { label: "Bakery owner",      hue: 28,  photo: "1494790108377-be9c29b29330", fallback: { skin: "#e8b48a", hair: "#2b1b12", shirt: "#d97706", style: "bun" } },
+    { label: "Gym owner",         hue: 200, photo: "1507003211169-0a1dd7228f2d", fallback: { skin: "#8d5524", hair: "#111111", shirt: "#2563eb", style: "short", beard: true } },
+    { label: "Dental clinic",     hue: 160, photo: "1573496359142-b8d87734a5a2", fallback: { skin: "#f1c27d", hair: "#5a3a1a", shirt: "#0d9488", style: "long", glasses: true } },
+    { label: "Salon owner",       hue: 320, photo: "1438761681033-6461ffad8d80", fallback: { skin: "#c68642", hair: "#1a1a1a", shirt: "#db2777", style: "long" } },
+    { label: "Restaurant owner",  hue: 10,  photo: "1506794778202-cad84cf45f1d", fallback: { skin: "#a0673f", hair: "#222222", shirt: "#dc2626", style: "cap" } },
+    { label: "Real estate agent", hue: 260, photo: "1560250097-0b93528c311a", fallback: { skin: "#ffdbac", hair: "#b5651d", shirt: "#7c3aed", style: "short", glasses: true } },
+    { label: "Plumbing business", hue: 190, photo: "1500648767791-00dcc994a43e", fallback: { skin: "#c58c5a", hair: "#3b2416", shirt: "#0284c7", style: "cap", beard: true } },
+    { label: "Coaching centre",   hue: 90,  photo: "1544005313-94ddf0286df2", fallback: { skin: "#f3d2b3", hair: "#777777", shirt: "#16a34a", style: "bun", glasses: true } },
+    { label: "Boutique owner",    hue: 340, photo: "1524504388940-b1c1722653e1", fallback: { skin: "#d9a066", hair: "#2b1b12", shirt: "#e11d48", style: "long" } },
+    { label: "Physio clinic",     hue: 140, photo: "1519085360753-af0119f7cbe7", fallback: { skin: "#e0ac69", hair: "#111111", shirt: "#059669", style: "short" } },
   ];
   const ORBIT_SLOTS = [[7, 24], [11, 68], [17, 92], [93, 22], [88, 66], [83, 92]];
   function avatarSvg(a) {
@@ -296,8 +300,11 @@
     </svg>`;
   }
   function renderOrbit(el) {
-    const orb = (item, pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av" style="--h:${item[1]}">${avatarSvg(item[2])}</span><span class="tag">${esc(item[0])}</span></div>`;
-    el.innerHTML = ORBIT_SLOTS.map((pos, i) => orb(OWNERS[i], pos, i)).join("");
+    const face = (item) => { if (!item.photo) return avatarSvg(item.fallback); const img = document.createElement("img"); img.src = PHOTO(item.photo); img.alt = ""; img.width = 68; img.height = 68; img.loading = "eager"; img.decoding = "async"; img.addEventListener("error", () => { img.outerHTML = avatarSvg(item.fallback); }, { once: true }); return img; };
+    const setFace = (av, item) => { av.innerHTML = ""; const f = face(item); if (typeof f === "string") av.innerHTML = f; else av.append(f); av.style.setProperty("--h", item.hue); };
+    el.innerHTML = ORBIT_SLOTS.map((pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av"></span><span class="tag">${esc(OWNERS[i].label)}</span></div>`).join("");
+    el.querySelectorAll(".orb .av").forEach((av, i) => setFace(av, OWNERS[i]));
+    OWNERS.slice(ORBIT_SLOTS.length).forEach((o) => { if (o.photo) { const pre = new Image(); pre.src = PHOTO(o.photo); } });   // warm the cache for the swaps
     if (reduced) return;
     let next = ORBIT_SLOTS.length, busy = false;
     setInterval(() => {
@@ -305,7 +312,7 @@
       const orbs = el.querySelectorAll(".orb"); if (!orbs.length) return;
       const o = orbs[Math.floor(Math.random() * orbs.length)]; const item = OWNERS[next++ % OWNERS.length];
       busy = true; o.classList.add("swap");
-      setTimeout(() => { o.querySelector(".av").innerHTML = avatarSvg(item[2]); o.querySelector(".av").style.setProperty("--h", item[1]); o.querySelector(".tag").textContent = item[0]; }, 260);
+      setTimeout(() => { setFace(o.querySelector(".av"), item); o.querySelector(".tag").textContent = item.label; }, 260);
       setTimeout(() => { o.classList.remove("swap"); busy = false; }, 700);
     }, 3600);
   }
