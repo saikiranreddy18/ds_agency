@@ -247,8 +247,12 @@ body.menu-open { overflow: hidden; }
 .hero-top-form input:focus { outline: none; }
 .hero-top-form .btn { border-radius: 999px; white-space: nowrap; flex: none; }
 .hero-top-note { margin: 16px auto 0; max-width: 34rem; font-size: .9rem; color: var(--muted); }
-.hero-top + .hero { padding-top: clamp(var(--s4), 5vw, var(--s6)); }
-.hero .hero-title { font-size: clamp(2.5rem, 6vw, 5.25rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.98; max-width: 14ch; margin-bottom: var(--s3); }
+/* The original hero, now the second screen: normal section proportions so it does not compete with the top hero */
+.hero-top + .hero { padding: clamp(var(--s5), 6vw, var(--s6)) 0; }
+.hero .hero-title { font-size: clamp(1.7rem, 3.1vw, 2.5rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.12; max-width: 22ch; margin-bottom: var(--s3); }
+.hero-top + .hero .lead { font-size: 1.02rem; max-width: 30rem; margin-bottom: var(--s3); }
+.hero-top + .hero .cta-micro, .hero-top + .hero .hero-trust { font-size: .85rem; }
+.hero-top + .hero .trust-row { margin-top: var(--s3); }
 
 .hero-top-orbit { position: absolute; inset: -6% 0 -4%; pointer-events: none; z-index: 0; }
 .orb {
@@ -256,13 +260,13 @@ body.menu-open { overflow: hidden; }
   transform: translate(-50%, -50%); opacity: 0;
   animation: orbIn .8s var(--ease) calc(.3s + var(--i) * .12s) forwards;
 }
-.orb .av {
-  width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
-  color: hsl(var(--h) 75% 72%); background: hsl(var(--h) 60% 52% / .16); border: 1px solid hsl(var(--h) 60% 62% / .4);
-  box-shadow: 0 16px 44px -18px hsl(var(--h) 70% 55% / .7), inset 0 0 0 1px rgba(255, 255, 255, .03);
+.orb .av {   /* illustrated owner avatar (SVG from site.js), clipped to a circle with a tinted ring */
+  width: 68px; height: 68px; border-radius: 50%; overflow: hidden; display: block;
+  background: hsl(var(--h) 60% 52% / .16); border: 2px solid hsl(var(--h) 60% 62% / .55);
+  box-shadow: 0 16px 44px -18px hsl(var(--h) 70% 55% / .8), 0 0 0 4px hsl(var(--h) 60% 52% / .12);
   animation: orbFloat calc(5s + var(--i) * .7s) ease-in-out calc(var(--i) * -1.3s) infinite alternate;
 }
-.orb .av svg { width: 26px; height: 26px; }
+.orb .av svg { display: block; width: 100%; height: 100%; }
 .orb .tag {
   font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-2); white-space: nowrap;
   padding: 6px 10px; border-radius: 999px; background: var(--bg-1); border: 1px solid var(--line);
@@ -271,7 +275,7 @@ body.menu-open { overflow: hidden; }
 @keyframes orbIn { from { opacity: 0; transform: translate(-50%, -40%) scale(.7); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes orbFloat { from { transform: translateY(-6px); } to { transform: translateY(8px); } }
 @keyframes orbSwap { 0% { opacity: 1; transform: scale(1); } 40% { opacity: 0; transform: scale(.85); } 60% { opacity: 0; transform: scale(.85); } 100% { opacity: 1; transform: scale(1); } }
-:root[data-theme="light"] .orb .av { color: hsl(var(--h) 60% 36%); background: hsl(var(--h) 60% 50% / .12); border-color: hsl(var(--h) 55% 55% / .35); }
+:root[data-theme="light"] .orb .av { background: hsl(var(--h) 60% 50% / .14); border-color: hsl(var(--h) 55% 55% / .5); }
 @media (max-width: 960px) { .hero-top-orbit { display: none; } }
 @media (max-width: 640px) {
   .hero-top { padding-top: clamp(var(--s5), 12vw, var(--s6)); }

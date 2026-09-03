@@ -261,26 +261,53 @@
     area.addEventListener("pointerleave", () => { stage.style.removeProperty("--rx"); stage.style.removeProperty("--rz"); });
   }
 
-  /* Top hero: floating outcome bubbles, six slots around the headline, labels cycling through a pool. */
-  const ORBIT_POOL = [
-    ["cal", "Booking confirmed · 9:12 pm", 40], ["msg", "Missed call answered", 200], ["lead", "New lead qualified", 150],
-    ["bell", "Follow-up sent · day 3", 280], ["doc", "Quote chased automatically", 20], ["star", "Review request sent", 320],
-    ["crm", "CRM updated, no typing", 90], ["check", "Reminder delivered", 260], ["chart", "Weekly report ready", 180], ["team", "Handed to the right person", 120],
+  /* Top hero: floating business owners around the headline (illustrated avatars, no real photos),
+     six slots, cycling through the pool. The process is explained in the next section, so nothing here describes it. */
+  const OWNERS = [
+    /* label, hue, avatar: skin, hair, shirt, hair style, extras */
+    ["Bakery owner",       28,  { skin: "#e8b48a", hair: "#2b1b12", shirt: "#d97706", style: "bun" }],
+    ["Gym owner",          200, { skin: "#8d5524", hair: "#111111", shirt: "#2563eb", style: "short", beard: true }],
+    ["Dental clinic",      160, { skin: "#f1c27d", hair: "#5a3a1a", shirt: "#0d9488", style: "long", glasses: true }],
+    ["Salon owner",        320, { skin: "#c68642", hair: "#1a1a1a", shirt: "#db2777", style: "long" }],
+    ["Restaurant owner",   10,  { skin: "#a0673f", hair: "#222222", shirt: "#dc2626", style: "cap" }],
+    ["Real estate agent",  260, { skin: "#ffdbac", hair: "#b5651d", shirt: "#7c3aed", style: "short", glasses: true }],
+    ["Plumbing business",  190, { skin: "#c58c5a", hair: "#3b2416", shirt: "#0284c7", style: "cap", beard: true }],
+    ["Coaching centre",    90,  { skin: "#f3d2b3", hair: "#777777", shirt: "#16a34a", style: "bun", glasses: true }],
+    ["Boutique owner",     340, { skin: "#d9a066", hair: "#2b1b12", shirt: "#e11d48", style: "long" }],
+    ["Physio clinic",      140, { skin: "#e0ac69", hair: "#111111", shirt: "#059669", style: "short" }],
   ];
-  const ORBIT_SLOTS = [[7, 24], [11, 68], [23, 92], [93, 22], [88, 66], [77, 92]];
+  const ORBIT_SLOTS = [[7, 24], [11, 68], [17, 92], [93, 22], [88, 66], [83, 92]];
+  function avatarSvg(a) {
+    const hair = {
+      short: `<path d="M18 27c0-9 6-15 14-15s14 6 14 15v3c-2-5-6-8-14-8s-12 3-14 8z" fill="${a.hair}"/>`,
+      long:  `<path d="M17 28c0-10 7-16 15-16s15 6 15 16v16c0 2-2 3-4 3l-1-14H22l-1 14c-2 0-4-1-4-3z" fill="${a.hair}"/>`,
+      bun:   `<circle cx="32" cy="12" r="6" fill="${a.hair}"/><path d="M18 28c0-9 6-15 14-15s14 6 14 15v2c-2-5-6-8-14-8s-12 3-14 8z" fill="${a.hair}"/>`,
+      cap:   `<path d="M17 27c0-9 7-15 15-15s15 6 15 15H17z" fill="${a.hair}"/><rect x="13" y="25" width="38" height="5" rx="2.5" fill="${a.hair}"/>`,
+    }[a.style] || "";
+    return `<svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M11 66c0-13 9-20 21-20s21 7 21 20z" fill="${a.shirt}"/>
+      <rect x="27" y="35" width="10" height="10" rx="3" fill="${a.skin}"/>
+      <circle cx="32" cy="28" r="12" fill="${a.skin}"/>
+      ${hair}
+      ${a.beard ? `<path d="M22 31c1 8 5 11 10 11s9-3 10-11c-2 4-5 5-10 5s-8-1-10-5z" fill="${a.hair}" opacity=".9"/>` : ""}
+      <g fill="#1a1208"><circle cx="27.5" cy="28" r="1.2"/><circle cx="36.5" cy="28" r="1.2"/></g>
+      <path d="M28.5 33.5c2 1.6 5 1.6 7 0" stroke="#1a1208" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      ${a.glasses ? `<g fill="none" stroke="#1a1208" stroke-width="1.4" opacity=".75"><circle cx="27.5" cy="28" r="3.6"/><circle cx="36.5" cy="28" r="3.6"/><path d="M31.1 28h1.8"/></g>` : ""}
+    </svg>`;
+  }
   function renderOrbit(el) {
-    const orb = (item, pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av" style="--h:${item[2]}">${D.icons[item[0]] || ""}</span><span class="tag">${esc(item[1])}</span></div>`;
-    el.innerHTML = ORBIT_SLOTS.map((pos, i) => orb(ORBIT_POOL[i], pos, i)).join("");
+    const orb = (item, pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av" style="--h:${item[1]}">${avatarSvg(item[2])}</span><span class="tag">${esc(item[0])}</span></div>`;
+    el.innerHTML = ORBIT_SLOTS.map((pos, i) => orb(OWNERS[i], pos, i)).join("");
     if (reduced) return;
     let next = ORBIT_SLOTS.length, busy = false;
     setInterval(() => {
       if (document.hidden || busy) return;
       const orbs = el.querySelectorAll(".orb"); if (!orbs.length) return;
-      const o = orbs[Math.floor(Math.random() * orbs.length)]; const item = ORBIT_POOL[next++ % ORBIT_POOL.length];
+      const o = orbs[Math.floor(Math.random() * orbs.length)]; const item = OWNERS[next++ % OWNERS.length];
       busy = true; o.classList.add("swap");
-      setTimeout(() => { o.querySelector(".av").innerHTML = D.icons[item[0]] || ""; o.querySelector(".av").style.setProperty("--h", item[2]); o.querySelector(".tag").textContent = item[1]; }, 260);
+      setTimeout(() => { o.querySelector(".av").innerHTML = avatarSvg(item[2]); o.querySelector(".av").style.setProperty("--h", item[1]); o.querySelector(".tag").textContent = item[0]; }, 260);
       setTimeout(() => { o.classList.remove("swap"); busy = false; }, 700);
-    }, 3200);
+    }, 3600);
   }
 
   document.querySelectorAll("[data-render]").forEach((el) => {
@@ -324,7 +351,7 @@
     const h1 = hero.querySelector("h1, .hero-title");
     const topHero = document.querySelector(".hero-top");
     if (ind && h1) {
-      hero.querySelector(".eyebrow").textContent = "AI automation agency · " + ind.name;
+      hero.querySelector(".eyebrow").textContent = "What we build · " + ind.name;
       h1.textContent = `AI websites and automations for ${ind.name.toLowerCase()}.`;
       if (topHero) { topHero.querySelector(".eyebrow").textContent = "AI automation agency · " + ind.name; topHero.querySelector("h1").textContent = `AI websites and automations for ${ind.name.toLowerCase()}.`; }
       const lead = hero.querySelector(".lead");
