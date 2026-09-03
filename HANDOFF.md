@@ -25,6 +25,7 @@ Forms are wired to n8n and verified end to end:
 - **Workflow:** "DS Agency website forms → email" · https://sai830.app.n8n.cloud/workflow/9fdhU4I3xUTSbqmQ · published.
   Webhook (CORS for ds-agency.vercel.app, the GitHub Pages site and localhost) → Normalize submission → in parallel: Gmail send (credential "Gmail account 2"; 3 retries; continue on fail) and insert into the **"DS Agency leads" data table** (so nothing is lost if mail fails).
 - **Notification address:** `dkai3782@gmail.com`, set in the "Normalize submission" node (`notify_to`). Reply-to is the visitor's email, so replying in Gmail answers them directly. Subjects: `[DS Agency] <source> · <email>`, prefixed `[TEST]` while `testMode` is on.
+- **Google Sheet:** a "Append row to Google Sheet" step (added in the n8n editor on 2026-09-03) appends every submission to the "Untitled spreadsheet" (Sheet1) after the data table insert. It was set to "append or update" with no matching column and failed on every run; it is now a plain append with auto-mapped columns, retries, and continue-on-fail. Rename the spreadsheet freely; the node references it by ID.
 - The webhook rejects non-browser user agents (bot filter). Browsers are fine; when testing with curl, pass a browser User-Agent.
 - The original "Gmail account" credential in n8n has expired; reconnect it there if you ever want to switch back.
 
@@ -93,8 +94,8 @@ n8n: Webhook (POST, "Form-Data" body) → IF `test_mode` is "true" (route to a t
 
 ## 6. Go-live checklist
 
-- [ ] `formEndpoint` set to the real URL; `auditEndpoint` only if you want a separate route
-- [ ] `testMode: false`
-- [ ] Web3Forms only: `access_key` hidden input added where required
-- [ ] `GROQ_API_KEY` set on Vercel for the chat assistant (see README)
-- [ ] One real submission per form, checked in the sheet or inbox
+- [x] `formEndpoint` set to the real URL (n8n webhook); `auditEndpoint` left empty
+- [x] `testMode: false` (set 2026-09-03)
+- [x] Web3Forms only: not used
+- [x] Chat assistant live (key on the `ds-agency-siak` project via `chat.fallbackEndpoint`; see section 0a)
+- [x] Test submissions from the contact form, the audit modal, the workflow modal and a mini-capture all arrived by email, in the data table and in the sheet (2026-09-03; rows with `test_mode = true`)

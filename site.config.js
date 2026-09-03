@@ -34,7 +34,7 @@ window.SITE = {
   auditEndpoint: "",
   // While true, every payload carries test_mode=true so test submissions can be
   // filtered out downstream. Set to false (or remove) before real traffic.
-  testMode: true,
+  testMode: false,
 
   // Where you work. Shown in the footer and About page.
   base: "India",

@@ -1,5 +1,7 @@
 # Effects, motion and play: how the DS Agency site uses them
 
+_Last reviewed 2026-09-03. Matches the live site as of that date; `git log -- EFFECTS.md` shows later changes._
+
 A short guide for whoever edits the site next. Every animation here has a job. If a new one does not fit one of the three jobs below, leave it out.
 
 ## Why motion exists on this site

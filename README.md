@@ -16,6 +16,17 @@ Static site, no build step. Dark editorial design with one amber accent and a sh
 | `about.html`, `legal.html` | Editorial about page; plain-language privacy and terms |
 | `styles.css`, `site.js` | Design tokens and components; header/footer/menu injection, workflow renderer, filters, counters, booking, form |
 
+> **Which commit is live?** Run `git log -1 --format="%h %ad %s" --date=short`. The live site at https://ds-agency.vercel.app auto-deploys every push to `main` (last verified 2026-09-03).
+
+## Start here for edits
+
+- **Forms.** Every form posts `multipart/form-data` to `formEndpoint` in `site.config.js` (today: the n8n webhook). The contact form lives in `contact.html` and is handled in `site.js`; the audit modal is built in `site.js` (`initAuditModal`); the workflow modal and every "send me this by email" mini-capture are handled by `deliver()` in `conversion.js`. Success and error text is set next to each handler. Field list and routing: `HANDOFF.md`.
+- **Source tags.** `window.DS.sources` in `conversion.js` maps each form to a `source` value (`contact_page`, `exit_intent_audit`, `recommend_email`, ...). `getSourceForForm(form)` reads it from `data-source`, then `data-kind`, then the page. Every payload also carries `page`, `timezone` and `test_mode`.
+- **Adding a form.** Copy an existing `<form class="mini-capture" data-kind="...">`, give it a new `data-kind`, add that kind to `window.DS.sources`, and keep a `<p class="status" role="status" aria-live="polite">` inside it. `deliver()` picks it up automatically; nothing else to wire. Add the new `source` value to the table in `HANDOFF.md` so the automation can route it.
+- **Analytics.** `window.DS.track(event, props)` dispatches a `ds:track` DOM event and, if `window.dataLayer` exists, pushes the same object there. To use GA4, load the GTM/GA4 snippet in every page's `<head>` before `conversion.js`; nothing else changes. Events are listed in `EFFECTS.md`.
+- **Primary colour.** Change `--accent` (and `--accent-dim`, `--accent-text`) in `:root` in `styles.css`; every component reads those tokens. The light theme overrides live under `:root[data-theme="light"]` in the same file.
+- **Chat.** `chat.js` calls `chat.endpoint`, then `chat.fallbackEndpoint` (both in `site.config.js`). The model is chosen at runtime by `api/chat.js`; pin one with the `CHAT_MODEL` env var.
+
 ## Theme and the 3D hero
 
 - **Dark is the default.** The sun/moon button in the header (and in the mobile menu) switches to light mode; the choice is saved in the visitor's browser. `theme.js` applies it before first paint so there is no flash. All colours are tokens in `styles.css`: the `:root` block is dark, `:root[data-theme="light"]` overrides it.

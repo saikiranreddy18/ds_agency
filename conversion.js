@@ -69,14 +69,18 @@
     data.set("test_mode", S.testMode ? "true" : "false"); // filter test submissions downstream
     setStatus(status, "", "");
     if (S.formEndpoint) {
-      if (btn) btn.setAttribute("aria-busy", "true");
+      if (form.dataset.pending === "1") return false; // ignore a second click while the first is in flight
+      form.dataset.pending = "1";
+      if (btn) { btn.setAttribute("aria-busy", "true"); btn.disabled = true; }
       try {
-        const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
+        const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
+        const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
+        clearTimeout(to);
         if (!res.ok) throw new Error("HTTP " + res.status);
         setStatus(status, okText, "ok"); form.reset(); return true;
       } catch (err) {
-        setStatus(status, "Could not send (" + err.message + "). Email " + (email || "us") + " instead.", "err"); return false;
-      } finally { if (btn) btn.removeAttribute("aria-busy"); }
+        setStatus(status, "Something went wrong on our side. Please try again in a moment, or email " + (email || "us") + " directly.", "err"); return false;
+      } finally { form.dataset.pending = ""; if (btn) { btn.removeAttribute("aria-busy"); btn.disabled = false; } }
     }
     const lines = [];
     data.forEach((v, k) => { if (k.startsWith("_") || k === "botcheck") return; const t = String(v).trim(); if (t) lines.push(nice(k) + ": " + t); });

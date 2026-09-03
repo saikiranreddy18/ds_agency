@@ -599,9 +599,15 @@
       };
       const endpoint = S.auditEndpoint || S.formEndpoint; // PLUG IN: audit requests can go to their own endpoint
       if (endpoint) {
-        f.querySelector("button").setAttribute("aria-busy", "true");
-        try { const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" } }); if (!res.ok) throw new Error("HTTP " + res.status); success(); }
-        catch (err) { st.className = "status err"; st.textContent = "Could not send. Email " + (S.email || "us") + " with your website instead."; f.querySelector("button").removeAttribute("aria-busy"); }
+        if (f.dataset.pending === "1") return; // one submission at a time
+        f.dataset.pending = "1"; const sb = f.querySelector('button[type="submit"]') || f.querySelector("button"); sb.disabled = true; sb.setAttribute("aria-busy", "true");
+        try {
+          const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
+          const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
+          clearTimeout(to);
+          if (!res.ok) throw new Error("HTTP " + res.status); success();
+        } catch (err) { st.className = "status err"; st.textContent = "Something went wrong on our side. Please try again, or email " + (S.email || "us") + " with your website instead."; sb.removeAttribute("aria-busy"); }
+        finally { f.dataset.pending = ""; sb.disabled = false; }
       } else {
         location.href = "mailto:" + (S.email || "") + "?subject=" + encodeURIComponent("Free automation audit") + "&body=" + encodeURIComponent("Website: " + data.get("website") + "\nBiggest bottleneck: " + (data.get("bottleneck") || "not given") + "\nMessage: " + (data.get("message") || "-") + "\nEmail: " + emailV);
         st.className = "status ok"; st.textContent = "Opening your email app. If nothing happens, email " + (S.email || "us") + " directly.";
@@ -893,16 +899,19 @@
       if (!data.get("page")) data.set("page", location.pathname + location.search);
       data.set("test_mode", S.testMode ? "true" : "false");
       if (S.formEndpoint) {
-        btn.setAttribute("aria-busy", "true");
+        if (form.dataset.pending === "1") return; // one submission at a time
+        form.dataset.pending = "1"; btn.setAttribute("aria-busy", "true"); btn.disabled = true;
         try {
-          const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
+          const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
+          const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
+          clearTimeout(to);
           if (!res.ok) throw new Error("HTTP " + res.status);
           status.textContent = "Sent. We usually respond within " + (S.responseTime || "24 hours") + "."; status.classList.add("ok"); form.reset();
           // Constant markup only; no user input goes through innerHTML here.
-          status.insertAdjacentHTML("beforeend", ' While you wait, you can book a time directly → <a href="book.html">Book a strategy call</a>');
+          status.insertAdjacentHTML("beforeend", ' While you wait, you can book a time directly → <a href="book.html">Book a Free Strategy Call</a>');
         } catch (err) {
-          status.textContent = "The message could not be sent (" + err.message + "). Email us directly: " + (S.email || ""); status.classList.add("err");
-        } finally { btn.removeAttribute("aria-busy"); }
+          status.textContent = "Something went wrong on our side. Please try again in a moment, or email us directly: " + (S.email || ""); status.classList.add("err");
+        } finally { form.dataset.pending = ""; btn.removeAttribute("aria-busy"); btn.disabled = false; }
       } else {
         const lines = []; data.forEach((v, k) => { if (!k.startsWith("_") && k !== "botcheck" && v) lines.push(k + ": " + v); });
         location.href = "mailto:" + (S.email || "") + "?subject=" + encodeURIComponent("Enquiry: " + (data.get("company") || data.get("name") || "website")) + "&body=" + encodeURIComponent(lines.join("\n"));
