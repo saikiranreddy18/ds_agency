@@ -1,1 +1,328 @@
-/* Conversion layer styles. Populated by the upgrade. */
+/* ==================================================================
+   Conversion layer. Loads after styles.css on every page.
+   Owns: qualifier, catalog meta, solutions bar, workflow modal extras,
+   mini-capture forms, presets, progress strip, FAQ, tooltips, sticky bar.
+   Tokens only, so the light theme (:root[data-theme="light"]) just works.
+================================================================== */
+
+/* ------------------------------------------------------------------
+   Small shared text bits
+------------------------------------------------------------------ */
+.fine { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+.cta-sub { font-size: 0.9rem; color: var(--muted); margin: 10px 0 0; max-width: 34rem; }
+.cta-alt { font-size: 0.9rem; color: var(--muted); margin: 8px 0 0; }
+.cta-alt a { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+.cta-alt a:hover { color: var(--accent-text); text-decoration-color: currentColor; }
+.cta-band .cta-sub { color: var(--muted); margin: var(--s3) auto 0; max-width: 32rem; }
+.cta-band .cta-alt { color: var(--muted); margin: 8px auto 0; max-width: 32rem; }
+
+/* ------------------------------------------------------------------
+   H11 Hero additions
+------------------------------------------------------------------ */
+.hero .cta-micro { margin: 12px 0 0; font-family: var(--mono); font-size: 0.7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-text); }
+.hero .hero-trust { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 0.88rem; color: var(--muted); max-width: 34rem; }
+.hero .hero-trust::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+.hero .micro-cta { margin-top: 12px; font-size: 0.9rem; }
+
+/* ------------------------------------------------------------------
+   H1 Micro-qualifier + card spotlight
+------------------------------------------------------------------ */
+.qualifier {
+  margin-top: var(--s4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4);
+  padding: var(--s3); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg-1);
+}
+.q-title { margin: 0; flex: 1 1 18rem; font-family: var(--display); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; line-height: 1.3; }
+.qualifier .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.sol.spot {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 0 8px var(--accent-dim);
+  animation: spotRing 2.4s var(--ease) 1;
+}
+@keyframes spotRing {
+  0%   { box-shadow: 0 0 0 0 var(--accent), 0 0 0 0 var(--accent-dim); }
+  30%  { box-shadow: 0 0 0 2px var(--accent), 0 0 0 16px var(--accent-dim); }
+  100% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 8px var(--accent-dim); }
+}
+
+/* ------------------------------------------------------------------
+   H2 Services: typical impact line + CTA row (also used after cases and the catalog)
+------------------------------------------------------------------ */
+.impact-line, .service .impact-line {
+  margin: 0 0 var(--s3); padding: 10px 12px; border-left: 2px solid var(--accent); border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--accent-dim); font-size: 0.88rem; color: var(--text-2);
+}
+.impact-line b { display: block; margin-bottom: 2px; font-family: var(--mono); font-weight: 500; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-text); }
+.cta-row {
+  margin-top: var(--s4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3);
+  padding: var(--s3) var(--s4); border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--bg-1), var(--bg-0));
+}
+.cta-row-text { flex: 1 1 22rem; font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1.3; }
+@media (max-width: 640px) {
+  .cta-row { padding: var(--s3); }
+  .cta-row .btn.primary { width: 100%; justify-content: center; }
+}
+
+/* ------------------------------------------------------------------
+   H3 Catalog card meta: hidden until hover/focus, same technique as .peek
+------------------------------------------------------------------ */
+.sol .peek-meta { max-height: 0; opacity: 0; overflow: hidden; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; transition: max-height .35s var(--ease), opacity .3s; }
+.sol .peek-meta .badge { font-size: 0.66rem; padding: 4px 8px; }
+.sol:hover .peek-meta, .sol:focus-visible .peek-meta { max-height: 80px; opacity: 1; }
+@media (hover: none) { .sol .peek-meta { max-height: 80px; opacity: 1; } } /* no hover on touch: always show setup time */
+
+/* ------------------------------------------------------------------
+   H4 Sticky solutions mini-bar (desktop only, centred, clear of the chat launcher)
+------------------------------------------------------------------ */
+.solbar {
+  position: fixed; left: 50%; bottom: 20px; z-index: 65; transform: translateX(-50%);
+  width: max-content; max-width: calc(100vw - 300px);
+  display: flex; align-items: center; gap: var(--s2); padding: 8px 8px 8px 18px;
+  border: 1px solid var(--line-2); border-radius: 999px; background: var(--nav-bg-2);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 0 0 1px rgba(242,181,68,.12), 0 18px 50px -20px rgba(242,181,68,.35);
+  animation: solbarIn .35s var(--ease);
+}
+.solbar-count { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); white-space: nowrap; }
+.solbar .btn { white-space: nowrap; border-radius: 999px; }
+@keyframes solbarIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translateX(-50%); } }
+@media (max-width: 900px) { .solbar { display: none !important; } }
+
+/* ------------------------------------------------------------------
+   H5 Workflow modal (extends .modal / .box / .close from styles.css)
+------------------------------------------------------------------ */
+#workflow-modal .box { width: min(560px, 100%); max-height: calc(100vh - var(--s4)); overflow: auto; }
+#workflow-modal form { gap: 12px; }
+#workflow-modal label { display: grid; gap: 6px; font-size: 0.85rem; font-weight: 500; color: var(--text-2); }
+#workflow-modal label .opt { color: var(--muted); font-weight: 400; }
+#workflow-modal input, #workflow-modal select, #workflow-modal textarea {
+  width: 100%; font: inherit; font-size: 1rem; color: var(--text); padding: 12px 14px; min-height: 48px;
+  background: var(--bg-0); border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+#workflow-modal select {
+  appearance: none; -webkit-appearance: none; padding-right: 36px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat;
+}
+#workflow-modal textarea { min-height: 96px; resize: vertical; }
+#workflow-modal input:focus, #workflow-modal select:focus, #workflow-modal textarea:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px var(--accent-dim); }
+#workflow-modal label.invalid input, #workflow-modal label.invalid select, #workflow-modal label.invalid textarea { border-color: var(--danger); }
+#workflow-modal .btn.primary { justify-content: center; margin-top: 4px; }
+#workflow-modal .status.err { color: var(--danger); }
+#workflow-modal .close, #audit-modal .close { width: 40px; height: 40px; }
+#audit-modal select, #audit-modal textarea { font: inherit; font-size: 1rem; color: var(--text); background: var(--bg-0); border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 12px 14px; }
+#audit-modal textarea { min-height: 72px; resize: vertical; }
+#audit-modal select:focus, #audit-modal textarea:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px var(--accent-dim); }
+body.modal-open { overflow: hidden; }
+
+/* ------------------------------------------------------------------
+   H6 Mini-capture forms: one row on desktop, stacked on mobile
+------------------------------------------------------------------ */
+.mini-capture { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: var(--s2); }
+.fine + .mini-capture { margin-top: 4px; }
+.mini-capture input, .mini-capture select {
+  flex: 1 1 180px; min-width: 0; font: inherit; font-size: 0.95rem; color: var(--text); padding: 0 12px; min-height: 40px;
+  background: var(--bg-0); border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+.mini-capture select {
+  appearance: none; -webkit-appearance: none; padding-right: 32px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px; background-repeat: no-repeat;
+}
+.mini-capture input:focus, .mini-capture select:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px var(--accent-dim); }
+.mini-capture input.invalid, .mini-capture select.invalid { border-color: var(--danger); }
+.mini-capture .btn { flex: none; white-space: nowrap; }
+.mini-capture .status { flex: 0 0 100%; margin: 0; font-size: 0.85rem; color: var(--text-2); }
+.mini-capture .status { min-height: 1.3em; }
+.mini-capture .status.ok { color: var(--accent-text); }
+.mini-capture .status.err { color: var(--danger); }
+@media (max-width: 640px) {
+  .mini-capture input, .mini-capture select { flex: 1 1 100%; }
+  .mini-capture .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ------------------------------------------------------------------
+   H7 / H8 Presets, progress strip, ROI diagram
+------------------------------------------------------------------ */
+.presets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: var(--s3); padding-bottom: var(--s2); border-bottom: 1px dashed var(--line); }
+.presets .lbl, .configurator .presets .lbl, .roi .presets .lbl { flex: none; margin: 0 4px 0 0; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.presets .chip { font-size: 0.78rem; padding: 5px 11px; min-height: 32px; border-style: dashed; }
+.presets .chip:hover, .presets .chip:focus-visible { border-style: solid; }
+.roi > .presets, .roi > .roi-diagram { grid-column: 1 / -1; }
+
+.progress { list-style: none; margin: 0 0 var(--s3); padding: 0; display: flex; gap: 6px; counter-reset: pg; }
+.progress li {
+  flex: 1; display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--line);
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+  transition: color .25s, border-color .25s;
+}
+.progress li::before {
+  counter-increment: pg; content: counter(pg); width: 18px; height: 18px; flex: none; border-radius: 50%;
+  border: 1px solid var(--line-2); display: grid; place-items: center; font-size: 0.6rem; letter-spacing: 0;
+  transition: background .25s, color .25s, border-color .25s;
+}
+.progress li.done { color: var(--accent-text); border-bottom-color: var(--accent); }
+.progress li.done::before { content: "✓"; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (max-width: 480px) { .progress li { letter-spacing: .04em; gap: 6px; } }
+
+.roi-diagram { grid-column: 1 / -1; padding-bottom: var(--s3); border-bottom: 1px dashed var(--line); }
+.roi-diagram .flow.h { gap: 10px; }
+.roi-diagram .flow.h .node { font-family: var(--display); font-size: 0.9rem; font-weight: 700; padding: 10px 14px; background: var(--bg-2); border-color: var(--line-2); }
+.roi-diagram .flow.h .link { width: 22px; }
+
+/* ------------------------------------------------------------------
+   H9 Process note + FAQ (native <details>, no JS)
+------------------------------------------------------------------ */
+.process-note {
+  margin: var(--s4) 0 0; max-width: 46rem; padding: 14px 18px; font-size: 0.95rem; color: var(--text-2);
+  border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: var(--r); background: var(--bg-1);
+}
+.faq { margin-top: var(--s4); max-width: 46rem; border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: var(--s2);
+  padding: 16px 0; font-family: var(--display); font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; color: var(--text);
+  transition: color .15s;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: ""; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line-2);
+  background: linear-gradient(currentColor, currentColor) center / 10px 1px no-repeat, linear-gradient(currentColor, currentColor) center / 1px 10px no-repeat;
+  transition: transform .3s var(--ease), border-color .2s;
+}
+.faq summary:hover { color: var(--accent-text); }
+.faq summary:hover::after { border-color: var(--accent-text); }
+.faq details[open] summary::after { transform: rotate(45deg); border-color: var(--accent); }
+.faq details p { margin: 0 0 18px; max-width: 40rem; font-size: 0.95rem; color: var(--text-2); }
+.faq details[open] p { animation: faqIn .3s var(--ease); }
+@keyframes faqIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------------
+   H12 Case-study teaser line + mid-page capture block
+------------------------------------------------------------------ */
+.case .if-you { margin: -6px 0 0; font-size: 0.85rem; line-height: 1.45; color: var(--accent-text); }
+.capture {
+  margin-top: var(--s3); padding: var(--s3) var(--s4); border: 1px solid rgba(242,181,68,.3); border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--accent-dim), transparent 140%), var(--bg-1);
+}
+.capture-title { margin: 0 0 var(--s2); max-width: 40rem; font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1.3; }
+.capture .mini-capture { margin-top: 0; }
+.capture .fine { margin: 10px 0 0; }
+@media (max-width: 640px) { .capture { padding: var(--s3); } }
+
+/* ------------------------------------------------------------------
+   H13 Sticky mobile bar: text left, button right
+------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .sticky-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .sticky-cta .hint { flex: 1 1 auto; margin: 0; text-align: left; font-family: var(--display); font-weight: 600; font-size: 0.9rem; letter-spacing: -0.01em; text-transform: none; color: var(--text); }
+  .sticky-cta .btn { flex: none; width: auto; min-height: 44px; padding: 0 18px; }
+}
+
+/* ------------------------------------------------------------------
+   H15 "How we estimate this" on solution pages
+------------------------------------------------------------------ */
+details.estimate { margin-top: var(--s2); max-width: 42rem; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-1); }
+details.estimate summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2);
+  transition: color .15s;
+}
+details.estimate summary::-webkit-details-marker { display: none; }
+details.estimate summary::before { content: ""; width: 0; height: 0; border-left: 5px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .2s var(--ease); }
+details.estimate[open] summary::before { transform: rotate(90deg); }
+details.estimate summary:hover { color: var(--accent-text); }
+details.estimate p { margin: 0; padding: 0 16px 14px; font-size: 0.9rem; color: var(--text-2); }
+
+/* ------------------------------------------------------------------
+   H21 Term tooltips (CSS only) + 3D board help
+------------------------------------------------------------------ */
+.term {
+  position: relative; cursor: help; border-radius: 3px;
+  text-decoration: underline dotted; text-decoration-color: var(--accent-text); text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+.term::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translate(-50%, 4px); z-index: 6;
+  width: max-content; max-width: 240px; padding: 8px 10px; border-radius: var(--r-sm);
+  background: var(--bg-3); color: var(--text); border: 1px solid var(--line-2);
+  font-family: var(--body); font-weight: 400; font-size: 0.8rem; line-height: 1.4; letter-spacing: 0; text-transform: none; text-align: left; white-space: normal;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .15s, transform .15s, visibility 0s .15s;
+}
+.term::before {
+  content: ""; position: absolute; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); z-index: 7;
+  border: 5px solid transparent; border-top-color: var(--line-2); border-bottom: 0;
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s, visibility 0s .15s;
+}
+.term:hover::after, .term:focus::after, .term:focus-visible::after { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
+.term:hover::before, .term:focus::before, .term:focus-visible::before { opacity: 1; visibility: visible; transition-delay: 0s; }
+@media (max-width: 640px) {
+  .term::after { left: 0; transform: translate(0, 4px); max-width: min(240px, 80vw); }
+  .term:hover::after, .term:focus::after, .term:focus-visible::after { transform: none; }
+  .term::before { left: 12px; transform: none; }
+}
+
+.hero3d .legend { gap: 10px; }
+.hero3d .legend > span:last-of-type { margin-left: auto; }
+.hero3d .legend .help {
+  position: relative; width: 24px; height: 24px; padding: 0; flex: none; border-radius: 50%; border: 1px solid var(--line-2); background: var(--bg-1); color: var(--text-2);
+  font-family: var(--display); font-weight: 700; font-size: 12px; line-height: 1; letter-spacing: 0; cursor: pointer; display: grid; place-items: center;
+  transition: border-color .15s, color .15s;
+}
+.hero3d .legend .help::before { content: ""; position: absolute; inset: -10px; } /* 44px hit area */
+.hero3d .legend .help:hover, .hero3d .legend .help[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-text); }
+.hero3d .help-tip {
+  position: absolute; right: 0; bottom: 34px; z-index: 12; width: min(300px, 100%); padding: 14px 16px;
+  border-radius: var(--r); background: var(--bg-1); border: 1px solid var(--line-2);
+  box-shadow: 0 0 0 1px rgba(242,181,68,.12), 0 18px 50px -20px rgba(242,181,68,.3);
+  font-family: var(--body); font-size: 0.85rem; line-height: 1.5; color: var(--text-2); text-transform: none; letter-spacing: 0;
+  animation: tipIn .2s var(--ease);
+}
+.hero3d .help-tip b { display: block; margin-bottom: 8px; font-family: var(--mono); font-weight: 500; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-text); }
+.hero3d .help-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; }
+.hero3d .help-tip li::marker { color: var(--accent); }
+@keyframes tipIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------------
+   Reduced motion: OS setting and the site's own switch
+------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .sol.spot, .solbar, .faq details[open] p, .hero3d .help-tip { animation: none !important; }
+  .sol .peek-meta, .progress li, .progress li::before, .faq summary, .faq summary::after, details.estimate summary, details.estimate summary::before,
+  .term::after, .term::before, .hero3d .legend .help, .mini-capture input, .mini-capture select, #workflow-modal input, #workflow-modal select, #workflow-modal textarea { transition: none !important; }
+}
+:root[data-motion="reduced"] .sol.spot, :root[data-motion="reduced"] .solbar, :root[data-motion="reduced"] .faq details[open] p, :root[data-motion="reduced"] .hero3d .help-tip { animation: none !important; }
+:root[data-motion="reduced"] .sol .peek-meta, :root[data-motion="reduced"] .progress li, :root[data-motion="reduced"] .progress li::before, :root[data-motion="reduced"] .faq summary::after,
+:root[data-motion="reduced"] details.estimate summary::before, :root[data-motion="reduced"] .term::after, :root[data-motion="reduced"] .term::before { transition: none !important; }
+
+/* ------------------------------------------------------------------
+   Fixes from the accessibility pass + the remaining "Ion" effects
+------------------------------------------------------------------ */
+/* Touch targets */
+@media (pointer: coarse) {
+  .qualifier .chip, .presets .chip { min-height: 44px; padding: 8px 14px; }
+  .tags a.badge { min-height: 44px; }
+}
+.tags a.badge { min-height: 36px; padding: 8px 12px; align-items: center; }
+/* Placeholders readable on both themes */
+.mini-capture ::placeholder, #workflow-modal ::placeholder, #audit-modal ::placeholder { color: var(--muted); opacity: 1; }
+/* The solutions bar steps aside when the assistant panel is open */
+body:has(.chat.open) .solbar { display: none; }
+/* Booking time-zone line: body face, readable size */
+.tz { font-family: var(--body); font-size: 0.85rem; letter-spacing: 0; color: var(--text-2); }
+/* Industry "See solutions" pill keeps the pill face */
+.industry .links a.btn { font-family: var(--body); font-weight: 500; letter-spacing: 0; }
+
+/* Kinetic type on key section headlines (JS splits into .w spans when in view) */
+.kinetic-on-view.kinetic .w { display: inline-block; opacity: 0; transform: translateY(.3em); animation: wordIn .6s var(--ease) forwards; animation-delay: calc(var(--i) * 60ms); }
+/* Build-your-stack result pops in */
+.configurator .stack { animation: stackIn .45s var(--ease); transform-origin: top left; }
+@keyframes stackIn { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: none; } }
+/* Tap ripple on the 3D board */
+.hero3d .tap-ripple { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 2px solid var(--accent); pointer-events: none; transform: translateZ(2px) scale(.2); opacity: .9; animation: tapRipple 1.3s var(--ease) forwards; }
+@keyframes tapRipple { to { transform: translateZ(2px) scale(3.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .configurator .stack, .hero3d .tap-ripple { animation: none !important; } .kinetic-on-view.kinetic .w { opacity: 1; transform: none; animation: none; } }
+:root[data-motion="reduced"] .configurator .stack, :root[data-motion="reduced"] .hero3d .tap-ripple { animation: none !important; }
+:root[data-motion="reduced"] .kinetic-on-view.kinetic .w { opacity: 1; transform: none; animation: none; }

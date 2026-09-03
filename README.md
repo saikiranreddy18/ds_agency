@@ -50,6 +50,10 @@ Static site, no build step. Dark editorial design with one amber accent and a sh
 
 Deliberately not built: animated counters with invented numbers, a "recent wins" ticker, and a client-side AI chat (would expose an API key; route through an n8n webhook if wanted).
 
+## Conversion layer
+
+`conversion.js` + `conversion.css` hold the engagement mechanics added on top of the site: micro-qualifier (`?focus=`), sticky solutions bar, "Tell us your workflow" modal, "Send me this by email" mini-capture forms, kinetic section headlines, term tooltips, board tap ripple. `site.js` holds Build Your Stack presets and progress, ROI presets/diagram/estimate, the audit modal (exit-intent on desktop, scroll-depth + time on touch), related solutions/industries on detail pages, and the booking success panel. Every form carries a `source` field. **`DS-Agency-effects-and-hooks.txt`** maps each effect and every automation plug-in point to its file and selector.
+
 ## Site assistant (AI chat)
 
 `chat.js` adds an "Ask us" widget to every page. It builds a context block from `site.config.js` and `data.js` (services, process, solutions, industries, illustrative case studies, policies) and sends it with the conversation to `/api/chat`.

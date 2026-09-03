@@ -26,6 +26,9 @@
   };
   window.flowSteps = (arr) => arr.map((s) => s);
   window.DATA_BY_ID = { solution: (id) => D.solutions.find((s) => s.id === id), case: (id) => D.cases.find((c) => c.id === id) };
+  /* Industry id → catalog filter value (beauty and local fall under "other"). */
+  const FILTERABLE = ["healthcare", "fitness", "home", "ecommerce", "professional", "education"];
+  const industryFilter = (id) => (FILTERABLE.includes(id) ? id : "other");
 
   /* ---------------------------------------------------------------
      Chrome: header, mobile menu, footer, sticky CTA
@@ -133,7 +136,7 @@
   if (!["book", "contact"].includes(page)) {
     const sticky = document.createElement("div");
     sticky.className = "sticky-cta";
-    sticky.innerHTML = `<span class="hint">Free 30-min strategy call · we map your automation roadmap</span><a class="btn primary" href="book.html">Book a Free Strategy Call <span class="arr">→</span></a>`;
+    sticky.innerHTML = `<span class="hint">Free 30-min strategy call</span><a class="btn primary" href="book.html">Book now <span class="arr">→</span></a>`;
     document.body.append(sticky);
     const showAt = () => sticky.classList.toggle("show", window.scrollY > window.innerHeight * 0.8);
     window.addEventListener("scroll", showAt, { passive: true });
@@ -164,20 +167,36 @@
   /* ---------------------------------------------------------------
      Render data-driven blocks: [data-render="..."]
   --------------------------------------------------------------- */
-  const solCard = (s, extra = "") => `
-    <a class="sol ${s.size || ""} ${extra}" href="solution.html?id=${s.id}" data-industry="${s.industry.join(" ")}" data-use="${s.uses.join(" ")}">
+  /* Mini-capture form ("Send me this by email"). Rendered here; conversion.js owns the submit handler. */
+  const GOAL_OPTIONS = ["More bookings", "Capture and follow up leads", "Answer customers 24/7", "Stop chasing by hand", "Less admin", "More reviews", "Not sure yet"];
+  const miniCapture = (kind, label = "Send me this by email", opts = {}) => `
+    <form class="mini-capture" data-kind="${esc(kind)}" novalidate>
+      <input type="email" name="email" placeholder="you@company.com" required aria-label="Email">
+      <input type="url" name="website" placeholder="https://your-site.com" aria-label="Website (optional)">
+      ${opts.goal ? `<select name="goal" aria-label="Main goal"><option value="">Main goal</option>${GOAL_OPTIONS.map((o) => `<option>${esc(o)}</option>`).join("")}</select>` : ""}
+      <button class="btn sm primary" type="submit">${esc(label)}</button>
+      <p class="status" role="status" aria-live="polite"></p>
+    </form>`;
+  window.miniCapture = miniCapture;
+
+  /* opts.plain drops the bento size class so the card sits in a plain grid (detail pages). */
+  const solCard = (s, extra = "", opts = {}) => `
+    <a class="sol ${opts.plain ? "" : (s.size || "")} ${extra}" href="solution.html?id=${s.id}" data-industry="${s.industry.join(" ")}" data-use="${s.uses.join(" ")}">
       <span class="cat">${esc(s.cat)}</span>
       <h3>${esc(s.name)}</h3>
       ${s.badge ? `<span class="badge accent" style="align-self:flex-start">${esc(s.badge)}</span>` : ""}
       <ul class="peek" aria-label="Typical potential impact">${s.impact.slice(0, 3).map(([b, t]) => `<li><strong>${esc(b)}</strong> · ${esc(t)}</li>`).join("")}</ul>
+      ${s.setup || s.bestFor ? `<div class="peek-meta">${s.setup ? `<span class="badge">Typical setup · ${esc(s.setup)}</span>` : ""}${s.bestFor ? `<span class="badge">Best for · ${esc(s.bestFor)}</span>` : ""}</div>` : ""}
       <p>${esc(s.outcome)}</p>
-      ${renderFlow(s.flow.slice(0, s.size === "tall" ? 7 : 4), { horizontal: true })}
+      ${renderFlow(s.flow.slice(0, !opts.plain && s.size === "tall" ? 7 : 4), { horizontal: true })}
       <span class="more">View solution →</span>
     </a>`;
+  window.solCard = solCard;
   const caseCard = (c) => `
     <a class="case" href="case-study.html?id=${c.id}">
       <div class="meta"><span class="badge">${esc(c.industry)} · ${esc(c.country)}</span><span class="badge accent dot">${esc(c.status)}</span></div>
       <h3>${esc(c.title)}</h3>
+      ${c.ifYou ? `<p class="if-you">${esc(c.ifYou)}</p>` : ""}
       <dl><div><dt>Problem</dt><dd>${esc(c.problem)}</dd></div><div><dt>Built</dt><dd>${esc(c.built)}</dd></div></dl>
       <div class="res">${c.results.map(([b, t]) => `<div><b>${esc(b)}</b> <span>${esc(t)}</span></div>`).join("")}</div>
     </a>`;
@@ -239,7 +258,7 @@
         <span class="badge">${esc(ind.who)}</span>
         <h3>${esc(ind.name)}</h3>
         <p><strong style="color:var(--text)">Where it leaks:</strong> ${esc(ind.pain)}</p>
-        <div class="links">${ind.sols.map((id) => { const s = DATA_BY_ID.solution(id); return s ? `<a href="solution.html?id=${s.id}">${esc(s.name)}</a>` : ""; }).join("")}</div>
+        <div class="links">${ind.sols.map((id) => { const s = DATA_BY_ID.solution(id); return s ? `<a href="solution.html?id=${s.id}">${esc(s.name)}</a>` : ""; }).join("")}<a class="btn quiet" href="solutions.html?industry=${encodeURIComponent(industryFilter(ind.id))}">See solutions for ${esc(ind.name)} →</a></div>
       </article>`).join("");
   });
 
@@ -256,8 +275,8 @@
       hero.querySelector(".eyebrow").textContent = "AI automation agency · " + ind.name;
       h1.textContent = `AI websites and automations for ${ind.name.toLowerCase()}.`;
       const lead = hero.querySelector(".lead");
-      if (lead) lead.textContent = `${ind.pain} We build the website and the automations that close those gaps, in tools you already use.`;
-      const explore = hero.querySelector('a[href="solutions.html"]'); if (explore) explore.href = "solutions.html?industry=" + encodeURIComponent(["healthcare","fitness","home","ecommerce","professional","education"].includes(ind.id) ? ind.id : "other");
+      if (lead) lead.textContent = ind.hero || `${ind.pain} We build the website and the automations that close those gaps, in tools you already use.`;
+      const explore = hero.querySelector('a[href="solutions.html"]'); if (explore) explore.href = "solutions.html?industry=" + encodeURIComponent(industryFilter(ind.id));
     }
     // Kinetic headline: word-by-word reveal (one of the two lines that gets this treatment).
     if (h1 && !reduced) {
@@ -294,15 +313,30 @@
   if (cfg) {
     const GOALS = [["booking", "More bookings"], ["leads", "Capture and follow up leads"], ["support", "Answer customers 24/7"], ["followup", "Stop chasing by hand"], ["ops", "Less admin"], ["reviews", "More reviews"]];
     const INDS = Object.entries(D.industryLabels);
+    /* Quick-start presets: [id, label, industry chip, goal chip]. Each one clicks the two real chips. */
+    const PRESETS = [["clinic", "Clinic", "healthcare", "booking"], ["gym", "Gym / studio", "fitness", "leads"], ["salon", "Salon", "other", "booking"], ["home", "Home service", "home", "leads"], ["store", "Online store", "ecommerce", "support"], ["pro", "Professional service", "professional", "leads"]];
     const state = { industry: "", goal: "" };
     cfg.innerHTML = `
       <div>
+        <div class="presets" aria-label="Quick presets"><span class="lbl">Quick start</span>${PRESETS.map(([k, v]) => `<button class="chip" type="button" data-preset="${k}" aria-pressed="false">${esc(v)}</button>`).join("")}</div>
         <div class="q"><div class="lbl">1 · Your industry</div><div class="chips" data-g="industry">${INDS.map(([k, v]) => `<button class="chip" type="button" data-v="${k}" aria-pressed="false">${esc(v)}</button>`).join("")}</div></div>
         <div class="q"><div class="lbl">2 · Main goal</div><div class="chips" data-g="goal">${GOALS.map(([k, v]) => `<button class="chip" type="button" data-v="${k}" aria-pressed="false">${esc(v)}</button>`).join("")}</div></div>
       </div>
-      <div class="result" aria-live="polite"><div class="head"><h3>Your recommended stack</h3><span class="badge">Rule-based · not a quote</span></div><div class="body"></div></div>`;
+      <div class="result">
+        <p class="sr" aria-live="polite" data-announce></p>
+        <ol class="progress" aria-label="Progress"><li data-step="industry">Industry</li><li data-step="goal">Goal</li><li data-step="stack">Your stack</li></ol>
+        <div class="head"><h3>Your recommended stack</h3><span class="badge">Rule-based · not a quote</span></div><div class="body"></div>
+      </div>`;
     const body = cfg.querySelector(".body");
+    const progress = cfg.querySelectorAll(".progress [data-step]");
+    const presetBtns = cfg.querySelectorAll("[data-preset]");
+    const syncMeta = () => {
+      const ready = !!(state.industry && state.goal);
+      progress.forEach((li) => { const k = li.dataset.step; li.classList.toggle("done", k === "stack" ? ready : !!state[k]); });
+      presetBtns.forEach((b) => { const p = PRESETS.find((x) => x[0] === b.dataset.preset); b.setAttribute("aria-pressed", String(!!p && p[2] === state.industry && p[3] === state.goal)); });
+    };
     const render = () => {
+      syncMeta();
       if (!state.industry || !state.goal) { body.innerHTML = `<p class="empty">Pick an industry and a goal. We will show the website and the two or three automations we would start with.</p>`; return; }
       const scored = D.solutions.map((s) => ({ s, score: (s.uses.includes(state.goal) ? 2 : 0) + (s.industry.includes(state.industry) ? 1 : 0) + (s.uses[0] === state.goal ? 1 : 0) })).filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
       const indName = D.industryLabels[state.industry] || "your business";
@@ -311,12 +345,20 @@
           <div class="item web"><span class="n">00</span><div><b>AI website for ${esc(indName.toLowerCase())}</b><span>Fast, answers questions from your own material, captures every visitor's details. The base every stack sits on.</span></div></div>
           ${scored.map(({ s }, i) => `<a class="item" href="solution.html?id=${s.id}"><span class="n">0${i + 1}</span><div><b>${esc(s.name)}</b><span>${esc(s.outcome)}</span></div></a>`).join("")}
         </div>
-        <div class="cta"><a class="btn primary" href="book.html?industry=${encodeURIComponent(state.industry)}&goal=${encodeURIComponent(state.goal)}">Get a custom version of this for your business <span class="arr">→</span></a></div>`;
+        <div class="cta"><a class="btn primary" href="book.html?industry=${encodeURIComponent(state.industry)}&goal=${encodeURIComponent(state.goal)}">Get a custom version of this for your business <span class="arr">→</span></a></div>
+        <p class="fine">This is a starting point. We'll refine it after understanding your exact tools and constraints.</p>
+        ${miniCapture("stack", "Send me this stack by email")}`;
+      const ann = cfg.querySelector("[data-announce]"); if (ann) ann.textContent = `Stack updated: AI website plus ${scored.length} automations for ${indName}.`;
     };
-    cfg.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => {
+    cfg.querySelectorAll("[data-g] .chip").forEach((chip) => chip.addEventListener("click", () => {
       const g = chip.closest("[data-g]").dataset.g; state[g] = chip.dataset.v;
       chip.closest("[data-g]").querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
       render();
+    }));
+    presetBtns.forEach((b) => b.addEventListener("click", () => {
+      const p = PRESETS.find((x) => x[0] === b.dataset.preset); if (!p) return;
+      const ind = cfg.querySelector(`[data-g="industry"] .chip[data-v="${p[2]}"]`), goal = cfg.querySelector(`[data-g="goal"] .chip[data-v="${p[3]}"]`);
+      if (ind) ind.click(); if (goal) goal.click();
     }));
     render();
   }
@@ -327,8 +369,18 @@
   --------------------------------------------------------------- */
   const roi = document.querySelector('[data-render="roi"]');
   if (roi) {
+    /* Example businesses: illustrative defaults only, stated in the title so nothing is hidden. */
+    const ROI_PRESETS = [
+      ["clinic", "Small clinic", { leads: 80, close: 35, value: 120, hours: 12, rate: 20 }],
+      ["local", "Local service business", { leads: 40, close: 30, value: 350, hours: 10, rate: 25 }],
+      ["store", "Online store", { leads: 200, close: 8, value: 70, hours: 15, rate: 18 }],
+      ["agency", "Consulting / agency", { leads: 25, close: 25, value: 2500, hours: 8, rate: 40 }],
+    ];
+    const presetTitle = (v) => `Illustrative defaults: ${v.leads} enquiries a month, ${v.close}% become customers, ${v.value} per customer, ${v.hours} admin hours a week, ${v.rate} per hour`;
     roi.innerHTML = `
+      <div class="roi-diagram" style="grid-column:1/-1">${renderFlow([["lead", "Enquiries"], ["msg", "Instant replies"], ["cal", "More bookings + less admin"], ["chart", "Extra revenue"]], { horizontal: true })}</div>
       <div class="inputs">
+        <div class="presets" data-presets="roi" aria-label="Example businesses"><span class="lbl">Try an example</span>${ROI_PRESETS.map(([k, l, v]) => `<button class="chip" type="button" data-preset="${k}" aria-pressed="false" title="${esc(presetTitle(v))}">${esc(l)}<span class="sr"> — ${esc(presetTitle(v))}</span></button>`).join("")}<span class="fine" style="flex-basis:100%;margin:6px 0 0">Example numbers only. Swap in your own.</span></div>
         <label>Currency <select name="cur"><option>$</option><option>£</option><option>€</option><option>₹</option><option>AED</option><option>A$</option><option>S$</option></select></label>
         <label>New enquiries per month <input type="number" name="leads" value="60" min="0"></label>
         <label>Enquiries that become customers now (%) <input type="number" name="close" value="20" min="0" max="100"></label>
@@ -347,7 +399,10 @@
         <div class="metric"><b data-o="customers">—</b><span>extra customers per month</span><small>= enquiries × conversion × lift</small></div>
         <div class="metric"><b data-o="revenue">—</b><span>extra revenue per month</span><small>= extra customers × customer value</small></div>
         <p class="note">Modelled estimate from your inputs and the assumptions above. Not a forecast or a guarantee. On a call we replace the assumptions with numbers from your own tools.</p>
+        <details class="estimate"><summary>How we estimate this</summary><p>Hours given back = your admin hours × 4.33 weeks × the share you say can be automated. Cost removed = those hours × your hourly cost. Extra customers = your enquiries × your current conversion × the lift you set. Extra revenue = extra customers × your customer value. Every input is yours; the two assumptions are editable and start at values we consider cautious. Nothing here is measured from your business yet.</p></details>
         <div class="cta"><a class="btn primary" href="book.html">Want a tailored version? Book a call <span class="arr">→</span></a></div>
+        <p class="fine">We can walk through these numbers with you on a 30-min call and show exactly where automation fits.</p>
+        ${miniCapture("roi", "Send me these numbers by email")}
       </div>`;
     const g = (n) => parseFloat(roi.querySelector(`[name="${n}"]`).value) || 0;
     const fmt = (n) => n >= 1000 ? Math.round(n).toLocaleString() : (Math.round(n * 10) / 10).toLocaleString();
@@ -362,51 +417,94 @@
       roi.querySelector('[data-o="customers"]').textContent = fmt(customers);
       roi.querySelector('[data-o="revenue"]').textContent = cur + " " + Math.round(revenue).toLocaleString();
     };
-    roi.addEventListener("input", calc); calc();
+    const presetBtns = roi.querySelectorAll("[data-preset]");
+    presetBtns.forEach((b) => b.addEventListener("click", () => {
+      const p = ROI_PRESETS.find((x) => x[0] === b.dataset.preset); if (!p) return;
+      Object.entries(p[2]).forEach(([k, v]) => { const f = roi.querySelector(`[name="${k}"]`); if (f) f.value = v; });
+      presetBtns.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      calc();
+    }));
+    roi.addEventListener("input", (e) => {
+      if (e.target.closest(".mini-capture")) return;
+      presetBtns.forEach((x) => x.setAttribute("aria-pressed", "false"));
+      calc();
+    });
+    calc();
   }
 
   /* ---------------------------------------------------------------
      Exit-intent offer (desktop, once per session, not on booking/contact)
   --------------------------------------------------------------- */
-  if (!["book", "contact"].includes(page) && window.matchMedia("(hover: hover)").matches) {
+  /* Audit offer: exit-intent on pointer devices, scroll-depth + time on touch devices. Once per session.
+     PLUG IN: submits to SITE.formEndpoint with source=exit_intent_audit (or source=mobile_engagement). */
+  if (!["book", "contact"].includes(page)) {
     let shown = false; try { shown = sessionStorage.getItem("exitShown") === "1"; } catch (e) { /* ignore */ }
+    const RT = S.responseTime || "24 hours";
     const armed = Date.now() + 8000;
-    const modal = document.createElement("div"); modal.className = "modal"; modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true"); modal.setAttribute("aria-labelledby", "exit-title");
+    const modal = document.createElement("div"); modal.className = "modal"; modal.id = "audit-modal"; modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true"); modal.setAttribute("aria-labelledby", "exit-title");
     modal.innerHTML = `<div class="box">
       <button class="close" type="button" aria-label="Close">×</button>
       <p class="eyebrow">Before you go</p>
       <h3 id="exit-title">Get a free 5-minute automation audit</h3>
-      <p>Leave your website and email. We record a short walkthrough of the first three things we would automate for your business, usually within two working days.</p>
-      <form>
-        <input type="url" name="website" placeholder="https://your-website.com" required>
-        <input type="email" name="email" placeholder="you@company.com" required>
+      <p>Tell us your website and biggest bottleneck. We usually reply within ${esc(RT)} with 2–3 concrete automations we'd build for you.</p>
+      <form novalidate>
+        <input type="url" name="website" placeholder="https://your-website.com" aria-label="Website" autocomplete="url" inputmode="url" required>
+        <input type="email" name="email" placeholder="you@company.com" aria-label="Work email" autocomplete="email" inputmode="email" required>
+        <select name="bottleneck" aria-label="Biggest bottleneck right now"><option value="">Biggest bottleneck (optional)</option><option>Missed leads</option><option>Manual follow-up</option><option>Booking</option><option>Admin</option><option>Support</option><option>Not sure</option></select>
+        <textarea name="message" rows="2" placeholder="Anything else? (optional)" aria-label="Message (optional)"></textarea>
         <input type="hidden" name="_subject" value="Free automation audit request">
+        <input type="hidden" name="source" value="exit_intent_audit">
+        <input type="hidden" name="page" value="">
         <button class="btn primary" type="submit">Send me the audit <span class="arr">→</span></button>
         <p class="status" role="status" aria-live="polite"></p>
         <p class="fine">No newsletter. We only use this to send your audit.</p>
       </form>
     </div>`;
     document.body.append(modal);
-    const close = () => { modal.classList.remove("open"); };
+    let opener = null;
+    const open = (source) => {
+      if (shown) return;
+      shown = true; try { sessionStorage.setItem("exitShown", "1"); } catch (err) { /* ignore */ }
+      modal.querySelector('[name="source"]').value = source;
+      modal.querySelector('[name="page"]').value = location.href;
+      opener = document.activeElement;
+      modal.classList.add("open"); document.body.classList.add("modal-open");
+      modal.querySelector("input").focus();
+    };
+    const close = () => {
+      if (!modal.classList.contains("open")) return;
+      modal.classList.remove("open"); document.body.classList.remove("modal-open");
+      if (opener && typeof opener.focus === "function" && document.contains(opener)) opener.focus();
+      opener = null;
+    };
     modal.querySelector(".close").addEventListener("click", close);
     modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-    document.addEventListener("mouseout", (e) => {
-      if (shown || e.relatedTarget || e.clientY > 8 || Date.now() < armed) return;
-      shown = true; try { sessionStorage.setItem("exitShown", "1"); } catch (err) { /* ignore */ }
-      modal.classList.add("open"); modal.querySelector("input").focus();
-    });
+    if (window.matchMedia("(hover: hover)").matches) {
+      document.addEventListener("mouseout", (e) => { if (e.relatedTarget || e.clientY > 8 || Date.now() < armed) return; open("exit_intent_audit"); });
+    } else {
+      // Touch devices: after 25 s on the page and at least half of it scrolled.
+      const t0 = Date.now(); let deep = false;
+      const check = () => { const h = document.documentElement.scrollHeight - window.innerHeight; if (h > 0 && window.scrollY / h >= 0.5) deep = true; if (deep && Date.now() - t0 > 25000) { open("mobile_engagement"); window.removeEventListener("scroll", check); } };
+      window.addEventListener("scroll", check, { passive: true });
+      setTimeout(check, 26000);
+    }
     modal.querySelector("form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = e.target, st = f.querySelector(".status"), data = new FormData(f);
+      const emailV = String(data.get("email") || "").trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailV)) { st.className = "status err"; st.textContent = "Add a valid email so we can send the audit."; f.querySelector('[name="email"]').focus(); return; }
+      const success = () => {
+        f.innerHTML = `<p class="status ok" role="status">We'll send your automation audit to <b>${esc(emailV)}</b> within ${esc(RT)}.</p>
+          <a class="btn primary" href="book.html" style="justify-content:center">Book a live walkthrough instead <span class="arr">→</span></a>`;
+      };
       if (S.formEndpoint) {
         f.querySelector("button").setAttribute("aria-busy", "true");
-        try { const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } }); if (!res.ok) throw new Error("HTTP " + res.status); st.textContent = "Got it. Your audit is on its way."; st.classList.add("ok"); f.reset(); }
-        catch (err) { st.textContent = "Could not send. Email " + (S.email || "us") + " with your website instead."; }
-        finally { f.querySelector("button").removeAttribute("aria-busy"); }
+        try { const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } }); if (!res.ok) throw new Error("HTTP " + res.status); success(); }
+        catch (err) { st.className = "status err"; st.textContent = "Could not send. Email " + (S.email || "us") + " with your website instead."; f.querySelector("button").removeAttribute("aria-busy"); }
       } else {
-        location.href = "mailto:" + (S.email || "") + "?subject=" + encodeURIComponent("Free automation audit") + "&body=" + encodeURIComponent("Website: " + data.get("website") + "\nEmail: " + data.get("email"));
-        st.textContent = "Opening your email app…";
+        location.href = "mailto:" + (S.email || "") + "?subject=" + encodeURIComponent("Free automation audit") + "&body=" + encodeURIComponent("Website: " + data.get("website") + "\nBiggest bottleneck: " + (data.get("bottleneck") || "not given") + "\nMessage: " + (data.get("message") || "-") + "\nEmail: " + emailV);
+        st.className = "status ok"; st.textContent = "Opening your email app. If nothing happens, email " + (S.email || "us") + " directly.";
       }
     });
   }
@@ -420,6 +518,10 @@
     document.title = s.name + " · " + name;
     const root = document.getElementById("solution-root");
     const related = D.cases.filter((c) => (c.solutions || []).includes(s.id));
+    /* 2–3 other solutions that share a job (weighted) or an industry with this one. */
+    const relatedSols = D.solutions.filter((o) => o.id !== s.id)
+      .map((o) => ({ o, score: o.uses.filter((u) => s.uses.includes(u)).length * 2 + o.industry.filter((i) => s.industry.includes(i)).length }))
+      .filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3).map((x) => x.o);
     root.innerHTML = `
       <section class="page-head">
         <div class="wrap">
@@ -429,10 +531,12 @@
               <p class="eyebrow">${esc(s.cat)}</p>
               <h1>${esc(s.name)}</h1>
               <p class="lead">${esc(s.tagline)}</p>
+              <p class="fine">Deployed in your own accounts. No lock-in.</p>
               <div class="row" style="margin-top:var(--s3)">
                 <a class="btn primary" href="book.html">Book a Free Strategy Call <span class="arr">→</span></a>
                 <a class="btn ghost" href="solutions.html">Explore Solutions</a>
               </div>
+              <p class="cta-sub">We'll map this onto your tools and give you a fixed price.</p>
               <div class="tags" style="margin-top:var(--s3)">${(s.stack || []).map((t) => `<span class="badge">${esc(t)}</span>`).join("")}</div>
             </div>
             <div class="sticky panel">
@@ -451,9 +555,12 @@
           <h2>Expected impact</h2>
           <div class="impact reveal">${s.impact.map(([b, t]) => `<div class="metric"><b>${esc(b)}</b><span>${esc(t)}</span><small>Typical potential impact</small></div>`).join("")}</div>
           <p class="note" style="margin-top:var(--s2)">Typical potential impact. Ranges reflect how this kind of workflow usually performs. We report your actual numbers from your own dashboards once the system is live.</p>
+          <details class="estimate"><summary>How we estimate this</summary><p>These ranges are based on how this kind of workflow usually performs. They are targets we design for, not results we have measured. Your numbers depend on your volume, your tools and how fast you reply today. Once the system is live, we replace these figures with real numbers from your own dashboard.</p></details>
         </section>
         ${related.length ? `<section><h2>Related case studies</h2><div class="cases">${related.map(caseCard).join("")}</div></section>` : ""}
+        ${relatedSols.length ? `<section><h2>Related solutions</h2><div class="prose" style="margin-bottom:var(--s3)"><p>Most businesses run two of these together. These share a job or an industry with ${esc(s.name)}.</p></div><div class="related-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--s2)">${relatedSols.map((o) => solCard(o, "", { plain: true })).join("")}</div></section>` : ""}
       </div>
+      <div class="wrap"><div class="capture reveal" style="margin-bottom:var(--s5)"><p class="capture-title">Want this page in your inbox? We'll send it with a short note on how it would fit your business.</p>${miniCapture("solution", "Send me this solution by email")}</div></div>
       <section class="block cta-band">
         <div class="wrap">
           <h2>Want this running in your business?</h2>
@@ -471,6 +578,8 @@
     const c = DATA_BY_ID.case(id) || D.cases[0];
     document.title = c.title + " · " + name;
     const root = document.getElementById("case-root");
+    const caseSols = (c.solutions || []).map((sid) => DATA_BY_ID.solution(sid)).filter(Boolean);
+    const caseInds = D.industries.filter((i) => i.sols.some((sid) => (c.solutions || []).includes(sid)));
     root.innerHTML = `
       <section class="page-head">
         <div class="wrap">
@@ -498,8 +607,11 @@
           </div>
           <p class="ba-caption">DRAG THE HANDLE · left is the workflow they had, right is the one we built</p>
         </section>
-        <section><h2>The takeaway</h2><div class="prose"><p style="font-family:var(--display);font-size:1.35rem;color:var(--text);letter-spacing:-0.02em">${esc(c.takeaway)}</p></div></section>
+        <section><h2>The takeaway</h2><div class="prose"><p style="font-family:var(--display);font-size:1.35rem;color:var(--text);letter-spacing:-0.02em">${esc(c.takeaway)}</p><p class="next-step">If your day looks even 30% like this, we can probably build something similar. <a href="book.html">Tell us about your workflow → Book a strategy call</a></p></div></section>
+        ${caseSols.length ? `<section><h2>Related solutions</h2><div class="prose" style="margin-bottom:var(--s3)"><p>The systems used in this scenario, as packaged solutions.</p></div><div class="related-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--s2)">${caseSols.map((o) => solCard(o, "", { plain: true })).join("")}</div></section>` : ""}
+        ${caseInds.length ? `<section><h2>Related industries</h2><div class="prose" style="margin-bottom:var(--s3)"><p>Other businesses where the same systems fit.</p></div><div class="tags">${caseInds.map((i) => `<a class="badge" href="industries.html#${i.id}" style="text-decoration:none">${esc(i.name)} →</a>`).join("")}</div></section>` : ""}
       </div>
+      <div class="wrap"><div class="capture reveal" style="margin-bottom:var(--s5)"><p class="capture-title">Want this case study in your inbox? We'll send it with a note on how a similar flow could work for you.</p>${miniCapture("case", "Send me this case study by email")}</div></div>
       <section class="block cta-band">
         <div class="wrap">
           <h2>Want to build a system like this?</h2>
@@ -568,7 +680,7 @@
           if (dx || dy) { c.style.transition = "none"; c.style.transform = `translate(${dx}px, ${dy}px)`; requestAnimationFrame(() => requestAnimationFrame(() => { c.style.transition = ""; c.style.transform = ""; })); }
         });
       }
-      if (count) count.textContent = n + " of " + all.length;
+      if (count) count.textContent = "Showing " + n + " of " + all.length + " solutions";
       if (empty) empty.hidden = n > 0;
     };
     bar.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => {
@@ -591,7 +703,9 @@
     const link = (S.cal && S.cal.intro) || "";
     const alt = (S.calendly && S.calendly.deepDive) || (S.cal && S.cal.deepDive) || "";
     const tz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
-    const tzEl = document.querySelector(".tz"); if (tzEl && tz) tzEl.textContent = "Times shown in your time zone: " + tz;
+    /* Keep the page's own sentence; slot the detected zone into it. */
+    const tzEl = document.querySelector(".tz");
+    if (tzEl && tz) { const t = tzEl.textContent.trim(); tzEl.textContent = /your time zone/i.test(t) ? t.replace(/your time zone/i, (m) => m + " (" + tz + ")") : "Your time zone: " + tz + ". " + t; }
     const altEl = document.getElementById("cal-alt");
     if (altEl) { if (alt) { altEl.href = /^https?:/.test(alt) ? alt : "https://cal.com/" + alt; altEl.target = "_blank"; altEl.rel = "noopener"; } else { altEl.href = "contact.html"; } }
     const showBooked = () => {
@@ -602,8 +716,9 @@
         <h3>Booked. Here is what happens next.</h3>
         <ol>
           <li>You get a confirmation email now and a reminder before the call.</li>
-          <li>Reply to the confirmation with your website and the one task that eats the most time. We prepare before we meet.</li>
+          <li>Need a different time? The same email has a reschedule link.</li>
           <li>On the call: workflow audit, automation opportunities, and a written roadmap within a day.</li>
+          <li>Prepared? Reply to the confirmation email with your website and top 2 bottlenecks. We'll review before the call.</li>
         </ol>
       </div>`;
       left.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
@@ -681,6 +796,8 @@
           const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
           if (!res.ok) throw new Error("HTTP " + res.status);
           status.textContent = "Sent. We usually respond within " + (S.responseTime || "24 hours") + "."; status.classList.add("ok"); form.reset();
+          // Constant markup only; no user input goes through innerHTML here.
+          status.insertAdjacentHTML("beforeend", ' While you wait, you can book a time directly → <a href="book.html">Book a strategy call</a>');
         } catch (err) {
           status.textContent = "The message could not be sent (" + err.message + "). Email us directly: " + (S.email || ""); status.classList.add("err");
         } finally { btn.removeAttribute("aria-busy"); }

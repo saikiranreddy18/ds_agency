@@ -1,0 +1,128 @@
+DS AGENCY — EFFECTS, INTERACTIONS AND AUTOMATION HOOKS (where everything lives)
+==============================================================================
+Updated 2026-09-03. Static site, no build. Files: index.html, solutions.html,
+solution.html, industries.html, case-studies.html, case-study.html, book.html,
+about.html, contact.html · styles.css · conversion.css · site.js · conversion.js
+· chat.js · data.js · site.config.js · theme.js · api/chat.js · dev-server.py
+
+Everything below is already in the repo. This sheet tells you which file and
+selector to open for each piece, plus the exact places to plug your own
+automation endpoint in.
+
+------------------------------------------------------------------------------
+1. PLUG-IN POINTS FOR AUTOMATION (search for "PLUG IN" in the code)
+------------------------------------------------------------------------------
+All forms post to window.SITE.formEndpoint (site.config.js). Leave it empty and
+every form falls back to a mailto: link to SITE.email with the fields in the
+body. Set it to a Web3Forms / Formspree URL, or an n8n / Make webhook, and
+every form below POSTs multipart FormData with these fields:
+
+  Form                      File / selector                          Fields (plus _subject)                                   source=
+  Contact form              contact.html form.contact · site.js       name,email,company,country,website,industry,automate,   contact_form
+                                                                       message,source_page,timezone
+  Audit modal (exit intent) site.js "#audit-modal" (also on touch      website,email,bottleneck,message,page                    exit_intent_audit |
+    / mobile engagement)    after 50% scroll + 25 s)                                                                            mobile_engagement
+  Workflow modal            conversion.js "#workflow-modal"           website,email,goal,message,page                          workflow_modal
+  Mini-capture forms        conversion.js document submit handler     email,website,[goal],kind,summary,page                   capture_<kind>
+    kinds: stack (Build Your Stack), roi (ROI calculator), solution
+    (solution detail), case (case-study detail), recommend (home
+    mid-page block + solutions page inline form)
+  Chat assistant            chat.js → POST /api/chat (api/chat.js on   messages[],context,page                                 —
+                            Vercel with GROQ_API_KEY; dev-server.py
+                            locally). No key → rule-based fallback.
+  Booking                   book.html · site.js Calendly block         Calendly event `calendly.event_scheduled` (postMessage)  —
+                                                                       → success panel. Use Calendly webhooks for reminders
+                                                                       and post-call surveys.
+
+Success copy: audit modal → "We'll send your automation audit to <email>
+within <responseTime>." + "Book a live walkthrough instead". Mini-capture →
+"Done. We'll email this within <responseTime>." Workflow modal → "Got it. We
+usually reply within <responseTime> with 2–3 concrete automations." responseTime
+comes from site.config.js.
+
+------------------------------------------------------------------------------
+2. GLOBAL EFFECTS
+------------------------------------------------------------------------------
+Scroll reveals           styles.css .reveal/.in · site.js IntersectionObserver ("Reveal on scroll")
+Card hover lift + glow   styles.css .service:hover, .sol:hover, .case:hover, .industry:hover
+Kinetic typography       hero H1: site.js "Kinetic headline" + styles.css .kinetic .w
+                         2 section headlines: class "kinetic-on-view" (index.html: "We measure the
+                         work we remove.", final CTA H2) · conversion.js "Kinetic type" · conversion.css
+Background motion        hero gradient mesh: site.js injects .mesh · styles.css .hero .mesh
+                         section dividers: styles.css .block.rule::before (shimmer)
+                         integrations ring: styles.css .hub .core::before (rotates)
+Cursor halo              site.js "#halo" (hover: hover devices only) · styles.css #halo
+Sticky header            site.js sentinel + IntersectionObserver · styles.css header.nav.scrolled
+Sticky mobile CTA bar    site.js .sticky-cta ("Free 30-min strategy call" + "Book now") ·
+                         styles.css .sticky-cta · conversion.css two-column layout
+Reduced motion           every animation is disabled under @media (prefers-reduced-motion) and
+                         under :root[data-motion="reduced"] (footer "Reduce motion" switch,
+                         theme.js applies it before first paint)
+Light / dark             theme.js + site.js .theme-btn · styles.css :root[data-theme="light"]
+
+------------------------------------------------------------------------------
+3. HOMEPAGE (index.html)
+------------------------------------------------------------------------------
+Hero                     3D board: site.js renderHero3D() · styles.css .hero3d …
+                           packet travels (offset-path), tiles rise (tileRise), board ripples
+                           (.ripple), pointer tilt (--rx/--rz), hover labels (.sign),
+                           tap/click ripple (conversion.js "3D board" · conversion.css .tap-ripple),
+                           "?" help panel (conversion.js H21)
+                         ?for=<industry> personalisation: site.js "Effects" block, copy from
+                           data.js industries[].hero
+                         microcopy: .cta-micro "30 minutes · no pitch · you keep the roadmap",
+                           .hero-trust, .micro-cta (index.html lines ~28–31)
+Problem cards            3D flip: styles.css .problem .face (rotateY) · icons pop: .problem .icon
+                         micro-qualifier: index.html [data-qualifier] · conversion.js H1 → sets ?focus=,
+                           scrolls to and spotlights the matching card (.sol.spot), swaps
+                           [data-focus-copy] text
+Services                 .impact-line (label "Typical potential impact") · .cta-row after the grid
+Solutions bento          hover reveals .peek (3 impacts) + .peek-meta ("Typical setup ·", "Best for ·")
+                           from data.js setup/bestFor · flow speeds up on hover · FLIP reflow on the
+                           Solutions page (site.js "Catalog filters")
+                         sticky mini-bar: conversion.js H4 .solbar (desktop, hidden while chat open;
+                           count only where a filter bar exists)
+Build Your Stack         site.js "Build your stack": presets (Clinic, Gym / studio, Salon, Home
+                           service, Online store, Professional service), 3-step .progress strip,
+                           result pops in (conversion.css .stack), note + mini-capture kind=stack,
+                           screen-reader announcement [data-announce]
+Case studies teaser      .if-you lines from data.js cases[].ifYou · .cta-row · mid-page .capture
+                           (mini-capture kind=recommend)
+Process                  timeline draws itself (styles.css .timeline::before) · .process-note ·
+                           .faq <details> (animated where interpolate-size is supported)
+Integrations             .int[data-tip] tooltips ("Commonly used for …") · styles.css
+Trust                    metrics stay blank until verified · .industry-bar tooltips (site.js render)
+ROI calculator           site.js "ROI calculator": live updates, presets (illustrative; visible
+                           "Example numbers only" line + screen-reader copy), diagram above, "How
+                           we estimate this" <details>, CTA + mini-capture kind=roi
+Final CTA                styles.css .cta-band (radial glow, button pulse) · .cta-sub · .cta-alt
+
+------------------------------------------------------------------------------
+4. OTHER PAGES
+------------------------------------------------------------------------------
+solutions.html           sticky filters (?industry=&use= deep links), "Showing X of 8 solutions",
+                         FLIP reflow, .solbar, .cta-row + .capture (kind=recommend, goal select)
+solution.html            site.js "Solution detail page": trust line, .cta-sub, details.estimate,
+                         related case studies, related solutions (.related-grid), mini-capture
+                         kind=solution, Play + tooltips on the diagram
+case-studies.html        cards reveal, .cta-band copy
+case-study.html          site.js "Case study detail page": rail (styles.css .numbered::before),
+                         metrics count up (data-count), before/after slider (.ba-slider), takeaway
+                         follow-up (.next-step), related solutions + industries, mini-capture kind=case
+industries.html          "See solutions for <industry> →" per card (site.js industries render)
+book.html                explainer flow (data-render="explainer"), no-pitch line, Calendly themed
+                         embed (site.js), success panel (.booked)
+about.html               parallax shapes (.shapes), "Who you'll work with" (add your name/photo where
+                         the HTML comment says), CTA after "What we will not do"
+contact.html             focus glow, inline validation, loading state, success slide-in, "book a
+                         time directly" link on success (site.js contact handler)
+
+------------------------------------------------------------------------------
+5. NOT BUILT, ON PURPOSE
+------------------------------------------------------------------------------
+- Animated totals ("50+ automations") and client logos: no verified numbers yet.
+  The trust metrics show "—  published when verified".
+- Country filter on Solutions: every solution is available in every region.
+- "Recent wins" ticker: would require invented claims.
+- The prompt mentions supabase/functions/providers/ — this repo has no Supabase
+  code; providers are Groq (chat) and Calendly (booking).

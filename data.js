@@ -56,6 +56,7 @@ window.DATA = {
       ],
       impact: [["24/7", "Lead response availability"], ["One workflow", "From visitor to appointment"], ["Fewer no-shows", "Reminders and easy rescheduling"]],
       stack: ["Cal.com", "WhatsApp Business", "Google Calendar", "CRM or Sheets"],
+      setup: "3–4 weeks", bestFor: "Clinics, salons, consultants",
     },
     {
       id: "lead-followup", badge: "Target · reply in seconds, 24/7", cat: "Lead generation", name: "Lead Capture + Follow-Up",
@@ -81,6 +82,7 @@ window.DATA = {
       ],
       impact: [["Seconds", "Time to first reply, any hour"], ["Zero", "Leads forgotten in a spreadsheet"], ["Fewer manual tasks", "Follow-ups run themselves"]],
       stack: ["n8n", "CRM", "WhatsApp Business", "Email"],
+      setup: "2–3 weeks", bestFor: "Gyms, trades, agencies",
     },
     {
       id: "ai-support", badge: "Target · most tickets without a human", cat: "Customer support", name: "AI Customer Support",
@@ -104,6 +106,7 @@ window.DATA = {
       ],
       impact: [["24/7", "Answers without waiting"], ["Most tickets", "Handled without a human"], ["Full context", "On every escalation"]],
       stack: ["Web chat", "WhatsApp Business", "Helpdesk", "LLM provider"],
+      setup: "2–4 weeks", bestFor: "Stores, service firms, clinics",
     },
     {
       id: "whatsapp", badge: "Target · every chat logged, none lost", cat: "Messaging", name: "WhatsApp Automation",
@@ -126,6 +129,7 @@ window.DATA = {
       ],
       impact: [["One number", "Shared, logged, never lost"], ["Seconds", "Reply time on WhatsApp"], ["Structured", "Chats become records"]],
       stack: ["WhatsApp Business API", "n8n", "CRM", "Cal.com"],
+      setup: "2–4 weeks", bestFor: "Any business that lives on WhatsApp",
     },
     {
       id: "crm", badge: "Target · zero forgotten follow-ups", cat: "CRM", name: "CRM Automation",
@@ -149,6 +153,7 @@ window.DATA = {
       ],
       impact: [["Live", "Pipeline you can trust"], ["Fewer manual tasks", "Data entry removed"], ["Zero", "Forgotten follow-ups"]],
       stack: ["HubSpot, Pipedrive or Sheets", "n8n", "Email"],
+      setup: "2–3 weeks", bestFor: "Agencies, trades, consultants",
     },
     {
       id: "reviews", badge: "Target · every customer asked", cat: "Reviews", name: "Review Automation",
@@ -172,6 +177,7 @@ window.DATA = {
       ],
       impact: [["Every customer", "Asked, every time"], ["Private first", "Problems reach you, not Google"], ["Steady", "Flow of new reviews"]],
       stack: ["Google Business Profile", "WhatsApp or Email", "n8n"],
+      setup: "1–2 weeks", bestFor: "Any business with repeat customers",
     },
     {
       id: "ecommerce-support", badge: "Target · 60%+ tickets self-served", cat: "E-commerce", name: "E-commerce AI Support",
@@ -195,6 +201,7 @@ window.DATA = {
       ],
       impact: [["Most tickets", "Resolved without a human"], ["Seconds", "Pre-sale answers, 24/7"], ["Fewer manual tasks", "Status updates automated"]],
       stack: ["Shopify or WooCommerce", "Helpdesk", "WhatsApp Business", "Email"],
+      setup: "3–4 weeks", bestFor: "Shopify and WooCommerce stores",
     },
     {
       id: "internal-ops", badge: "Target · hours a week given back", cat: "Internal operations", name: "Internal Operations",
@@ -218,6 +225,7 @@ window.DATA = {
       ],
       impact: [["Hours a week", "Given back to the team"], ["One report", "Accurate picture of the business"], ["Logged", "Every automation, every run"]],
       stack: ["n8n", "Google Workspace", "Accounting tool", "Slack or WhatsApp"],
+      setup: "3–5 weeks", bestFor: "Small teams with many tools",
     },
   ],
 
@@ -225,6 +233,7 @@ window.DATA = {
     {
       id: "dental-uk", title: "Dental practice", industry: "Healthcare", country: "United Kingdom", status: "Illustrative scenario",
       duration: "4 weeks", clientType: "Two-dentist practice", solutions: ["ai-booking", "reviews"],
+      ifYou: "If your front desk is drowning in calls and messages, this is for you.",
       problem: "Leads were arriving outside business hours and follow-up was inconsistent.",
       built: "AI website + lead qualification + automated booking + reminders.",
       results: [["Faster", "lead response, day and night"], ["Hours a week", "of admin removed from reception"]],
@@ -238,6 +247,7 @@ window.DATA = {
     {
       id: "plumbing-au", title: "Plumbing company", industry: "Home services", country: "Australia", status: "Illustrative scenario",
       duration: "3 weeks", clientType: "Owner plus three engineers", solutions: ["lead-followup", "internal-ops"],
+      ifYou: "If you write quotes at night and chase invoices by phone, this is for you.",
       problem: "Quotes took one to two days to send, and jobs went to whoever replied first.",
       built: "Photo intake + AI quote draft + job scheduling + invoicing + review request.",
       results: [["Under an hour", "from enquiry to quote sent"], ["Same day", "invoices, every time"]],
@@ -251,6 +261,7 @@ window.DATA = {
     {
       id: "store-ae", title: "Online homeware store", industry: "E-commerce", country: "United Arab Emirates", status: "Illustrative scenario",
       duration: "3 weeks", clientType: "Two-person team, Shopify", solutions: ["ecommerce-support", "reviews"],
+      ifYou: "If most of your support inbox asks where an order is, this is for you.",
       problem: "The support inbox was mostly order-status questions, answered by hand a day later.",
       built: "AI support with live order lookup + proactive shipping updates + escalation + review flow.",
       results: [["Most tickets", "resolved without a human"], ["Seconds", "pre-sale answers, 24/7"]],
@@ -264,14 +275,14 @@ window.DATA = {
   ],
 
   industries: [
-    { id: "healthcare", name: "Healthcare", who: "Clinics, dental practices, physios, diagnostics", pain: "Calls missed during treatments, no reminders, evening enquiries answered next morning.", sols: ["ai-booking", "whatsapp", "reviews"] },
-    { id: "fitness", name: "Fitness", who: "Gyms, studios, personal trainers", pain: "DMs and trial requests answered late, trials that never convert.", sols: ["lead-followup", "ai-booking", "whatsapp"] },
-    { id: "beauty", name: "Salons and beauty", who: "Salons, spas, aesthetics", pain: "Phone tag for bookings, last-minute cancellations, no waitlist.", sols: ["ai-booking", "whatsapp", "reviews"] },
-    { id: "home", name: "Home services", who: "Plumbers, electricians, cleaners, landscapers", pain: "Quotes written at night, jobs lost to faster replies, invoices late.", sols: ["lead-followup", "internal-ops", "reviews"] },
-    { id: "ecommerce", name: "E-commerce", who: "Shopify, WooCommerce and custom stores", pain: "Support inbox full of status questions, pre-sale questions unanswered.", sols: ["ecommerce-support", "whatsapp", "reviews"] },
-    { id: "professional", name: "Professional services", who: "Accountants, lawyers, consultants, agencies", pain: "Unqualified calls on the calendar, proposals never chased, CRM out of date.", sols: ["lead-followup", "crm", "ai-booking"] },
-    { id: "education", name: "Education", who: "Tutors, coaching centres, small academies", pain: "Trial classes missed, parents not updated, fees chased by hand.", sols: ["ai-booking", "whatsapp", "internal-ops"] },
-    { id: "local", name: "Local services", who: "Restaurants, repair shops, pet care, any local business", pain: "Missed calls, repetitive questions, no follow-up after the visit.", sols: ["whatsapp", "ai-support", "reviews"] },
+    { id: "healthcare", name: "Healthcare", who: "Clinics, dental practices, physios, diagnostics", pain: "Calls missed during treatments, no reminders, evening enquiries answered next morning.", hero: "Built for clinics, dentists and care providers who need more booked appointments and fewer missed calls.", sols: ["ai-booking", "whatsapp", "reviews"] },
+    { id: "fitness", name: "Fitness", who: "Gyms, studios, personal trainers", pain: "DMs and trial requests answered late, trials that never convert.", hero: "Built for gyms, studios and trainers who want trial requests answered fast and turned into members.", sols: ["lead-followup", "ai-booking", "whatsapp"] },
+    { id: "beauty", name: "Salons and beauty", who: "Salons, spas, aesthetics", pain: "Phone tag for bookings, last-minute cancellations, no waitlist.", hero: "Built for salons, spas and aesthetics clinics that want bookings without phone tag.", sols: ["ai-booking", "whatsapp", "reviews"] },
+    { id: "home", name: "Home services", who: "Plumbers, electricians, cleaners, landscapers", pain: "Quotes written at night, jobs lost to faster replies, invoices late.", hero: "Built for plumbers, electricians and cleaners who want quotes out fast and invoices paid on time.", sols: ["lead-followup", "internal-ops", "reviews"] },
+    { id: "ecommerce", name: "E-commerce", who: "Shopify, WooCommerce and custom stores", pain: "Support inbox full of status questions, pre-sale questions unanswered.", hero: "Built for online stores that want status questions answered before they land in the inbox.", sols: ["ecommerce-support", "whatsapp", "reviews"] },
+    { id: "professional", name: "Professional services", who: "Accountants, lawyers, consultants, agencies", pain: "Unqualified calls on the calendar, proposals never chased, CRM out of date.", hero: "Built for accountants, lawyers, consultants and agencies who want qualified calls and a CRM that stays current.", sols: ["lead-followup", "crm", "ai-booking"] },
+    { id: "education", name: "Education", who: "Tutors, coaching centres, small academies", pain: "Trial classes missed, parents not updated, fees chased by hand.", hero: "Built for tutors, coaching centres and academies that want trial classes booked and parents kept in the loop.", sols: ["ai-booking", "whatsapp", "internal-ops"] },
+    { id: "local", name: "Local services", who: "Restaurants, repair shops, pet care, any local business", pain: "Missed calls, repetitive questions, no follow-up after the visit.", hero: "Built for restaurants, repair shops and local businesses that miss calls and want customers to come back.", sols: ["whatsapp", "ai-support", "reviews"] },
   ],
 
   useLabels: { leads: "Lead generation", booking: "Appointment booking", support: "Customer support", followup: "Follow-up", ops: "Internal operations", reviews: "Reviews", sales: "Sales", crm: "CRM" },

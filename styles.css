@@ -29,7 +29,7 @@
 :root[data-theme="light"] {
   --bg-0: #f5f6f8; --bg-1: #ffffff; --bg-2: #eef0f3; --bg-3: #e3e6eb;
   --line: #e1e4e9; --line-2: #cbd1d9;
-  --text: #101214; --text-2: #3d434d; --muted: #6b7280;
+  --text: #101214; --text-2: #3d434d; --muted: #646b78; /* 4.96:1 on bg-0 */
   --accent: #e9a930; --accent-2: #f2b544; --accent-hover: #d8991f; --accent-ink: #1a1200; --accent-dim: rgba(233,169,48,.16);
   --accent-text: #8f5f00; --accent-note: #6b4700;
   --danger: #c93c2c;
@@ -279,11 +279,15 @@ body.menu-open { overflow: hidden; }
 .problems { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s2); }
 .problem { position: relative; min-height: 240px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg-1); padding: var(--s3); cursor: pointer; overflow: hidden; transition: border-color .25s, transform .25s var(--ease); text-align: left; width: 100%; }
 .problem:hover, .problem:focus-visible, .problem.on { border-color: var(--line-2); transform: translateY(-2px); }
-.problem .face { transition: opacity .3s var(--ease), transform .3s var(--ease); }
-.problem .face.front { position: relative; }
-.problem .face.back { position: absolute; inset: var(--s3); opacity: 0; transform: translateY(10px); }
-.problem:hover .front, .problem:focus-visible .front, .problem.on .front { opacity: 0; transform: translateY(-10px); }
-.problem:hover .back, .problem:focus-visible .back, .problem.on .back { opacity: 1; transform: none; }
+/* Real 3D flip: front rotates away, back rotates in. Faces hide their backface. */
+.problem { perspective: 1100px; }
+.problem .face { transition: transform .6s var(--ease); backface-visibility: hidden; -webkit-backface-visibility: hidden; transform-style: preserve-3d; }
+.problem .face.front { position: relative; transform: rotateY(0deg); }
+.problem .face.back { position: absolute; inset: var(--s3); transform: rotateY(-180deg); }
+.problem:hover .front, .problem:focus-visible .front, .problem.on .front { transform: rotateY(180deg); }
+.problem:hover .back, .problem:focus-visible .back, .problem.on .back { transform: rotateY(0deg); }
+@media (prefers-reduced-motion: reduce) { .problem .face { transition: none; } }
+:root[data-motion="reduced"] .problem .face { transition: none; }
 .problem h3 { font-size: 1.1rem; margin-bottom: 8px; }
 .problem p { font-size: 0.9rem; color: var(--text-2); margin: 0; }
 .problem .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: block; }
@@ -911,3 +915,25 @@ form.contact .status.ok { animation: slideIn .45s var(--ease); }
   .timeline::before { transform: none; } .timeline .stage, .problem .icon, .impact .metric, .metrics .metric { opacity: 1; transform: none; transition: none; }
   .sol .peek { transition: none; }
 }
+
+/* Ion additions: glow on more cards, integration tooltips, animated FAQ */
+.case:hover, .industry:hover { box-shadow: 0 0 0 1px rgba(242,181,68,.35), 0 18px 50px -20px rgba(242,181,68,.3); border-color: rgba(242,181,68,.45); }
+.industry { transition: border-color .25s, box-shadow .25s; }
+.int[data-tip] { position: relative; cursor: default; }
+.int[data-tip]::after {
+  content: attr(data-tip); position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 6;
+  width: max-content; max-width: 240px; padding: 8px 10px; border-radius: var(--r-sm);
+  background: var(--bg-3); color: var(--text); border: 1px solid var(--line-2);
+  font-size: 0.8rem; line-height: 1.4; white-space: normal;
+  opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none;
+  transition: opacity .15s, transform .15s, visibility 0s .15s;
+}
+.int[data-tip]:hover::after, .int[data-tip]:focus-visible::after { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.hub .side.right .int[data-tip]::after { left: auto; right: 0; }
+/* FAQ: animated open/close where the browser supports it (Chrome 131+, others fall back to instant) */
+@supports (interpolate-size: allow-keywords) {
+  .faq details { interpolate-size: allow-keywords; }
+  .faq details::details-content { block-size: 0; overflow: hidden; transition: block-size .35s var(--ease), content-visibility .35s allow-discrete; }
+  .faq details[open]::details-content { block-size: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .faq details::details-content { transition: none; } .case:hover, .industry:hover { box-shadow: none; } }
