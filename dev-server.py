@@ -53,8 +53,39 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _read_form(self):
+        """Parse a multipart/form-data or urlencoded POST into a dict (local testing only)."""
+        n = int(self.headers.get("Content-Length", "0"))
+        raw = self.rfile.read(n) if n else b""
+        ctype = self.headers.get("Content-Type", "")
+        fields = {}
+        if ctype.startswith("multipart/form-data"):
+            from email.parser import BytesParser
+            from email.policy import default
+            msg = BytesParser(policy=default).parsebytes(b"Content-Type: " + ctype.encode() + b"\r\n\r\n" + raw)
+            for part in msg.iter_parts():
+                name = part.get_param("name", header="content-disposition")
+                if name:
+                    fields[name] = part.get_content().strip() if isinstance(part.get_content(), str) else ""
+        else:
+            from urllib.parse import parse_qsl
+            fields = dict(parse_qsl(raw.decode("utf-8", "replace")))
+        return fields
+
     def do_POST(self):
-        if self.path.split("?")[0] != "/api/chat":
+        path = self.path.split("?")[0]
+        if path == "/api/form":
+            # Local echo endpoint: set formEndpoint: "/api/form" to test payloads without a real provider.
+            fields = self._read_form()
+            print("[form] source=%s page=%s fields=%s" % (fields.get("source"), fields.get("page"), sorted(fields)), flush=True)
+            try:
+                with open(os.path.join(ROOT, ".form-log.jsonl"), "a", encoding="utf-8") as log:
+                    log.write(json.dumps(fields, ensure_ascii=False) + "\n")
+            except OSError:
+                pass
+            self._json(200, {"ok": True, "received": fields})
+            return
+        if path != "/api/chat":
             self._json(404, {"error": "not_found"})
             return
         key = os.environ.get("GROQ_API_KEY")

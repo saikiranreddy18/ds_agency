@@ -19,6 +19,29 @@
      mailto: link with every collected field in the body (same
      behaviour as the contact form in site.js).
   --------------------------------------------------------------- */
+  /* Single source map for every form on the site (also used by site.js via window.DS.sources).
+     PLUG IN: your automation can branch on the `source` field. */
+  const SOURCES = {
+    contact: "contact_page",
+    audit: "exit_intent_audit",
+    auditMobile: "mobile_engagement",
+    workflow: "workflow_modal",
+    stack: "build_stack_email",
+    roi: "roi_email_capture",
+    solution: "solution_detail_email",
+    case: "case_study_email",
+    recommend: "recommend_email",
+  };
+  const getSourceForForm = (form) => {
+    if (!form) return "unknown";
+    const explicit = form.querySelector('[name="source"]'); if (explicit && explicit.value) return explicit.value;
+    if (form.classList.contains("mini-capture")) return SOURCES[form.dataset.kind] || ("capture_" + (form.dataset.kind || "page"));
+    if (form.classList.contains("contact")) return SOURCES.contact;
+    return "form_" + (document.body.dataset.page || "page");
+  };
+  const timezone = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
+  window.DS = Object.assign(window.DS || {}, { sources: SOURCES, getSourceForForm, timezone });
+
   const nice = (k) => k.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
   const fixUrl = (v) => { const t = String(v || "").trim(); return t && !/^https?:\/\//i.test(t) ? "https://" + t : t; };
   const setStatus = (el, text, kind) => { if (!el) return; el.className = "status" + (kind ? " " + kind : ""); el.textContent = text; };
@@ -30,6 +53,10 @@
     const data = new FormData(form);
     Object.keys(extra).forEach((k) => { if (extra[k] != null && String(extra[k]).trim()) data.set(k, extra[k]); });
     if (!data.get("_subject")) data.set("_subject", subject);
+    // Every payload carries source, page and timezone so the automation can route and reply at a sensible hour.
+    if (!data.get("source")) data.set("source", getSourceForForm(form));
+    if (!data.get("page")) data.set("page", location.pathname + location.search);
+    if (!data.get("timezone") && timezone) data.set("timezone", timezone);
     setStatus(status, "", "");
     if (S.formEndpoint) {
       if (btn) btn.setAttribute("aria-busy", "true");
@@ -196,7 +223,7 @@
     if (!EMAIL_RE.test(emailF.value.trim())) { emailF.closest("label").classList.add("invalid"); bad = emailF; }
     if (bad) { setStatus(wfStatus, "Add a valid email and pick a goal so we can reply.", "err"); bad.focus(); return; }
     webF.value = fixUrl(webF.value);
-    wf.querySelector('[name="page"]').value = location.href;
+    wf.querySelector('[name="page"]').value = location.pathname + location.search;
     await deliver(wf, { subject: "Workflow request", okText: "Got it. We usually reply within " + RT + " with 2–3 concrete automations.", btn: wfBtn, status: wfStatus });
   });
 
@@ -242,9 +269,8 @@
     const webF = form.querySelector('[name="website"]'); if (webF) webF.value = fixUrl(webF.value);
     const summary = summaryFor(kind, form);
     if (kind === "stack" && !summary) { setStatus(status, "Pick an industry and a goal first. Then we can send the stack.", "err"); return; }
-    // PLUG IN: the automation endpoint receives kind, summary, page and a source tag per form.
-    const SOURCE = { stack: "build_stack_email", roi: "roi_email_capture", solution: "solution_detail_email", case: "case_study_email", recommend: "recommend_email" };
-    await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, page: location.href, source: SOURCE[kind] || ("capture_" + kind) }, okText: "Done. We'll email this within " + RT + ".", btn, status });
+    // PLUG IN: the automation endpoint receives kind, summary, page, timezone and the source tag from SOURCES.
+    await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, source: getSourceForForm(form) }, okText: "Done. We'll email this within " + RT + ".", btn, status });
   });
   document.addEventListener("input", (e) => { const t = e.target; if (t && t.classList && t.classList.contains("invalid")) t.classList.remove("invalid"); });
 

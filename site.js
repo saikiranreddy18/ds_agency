@@ -455,6 +455,7 @@
         <input type="hidden" name="_subject" value="Free automation audit request">
         <input type="hidden" name="source" value="exit_intent_audit">
         <input type="hidden" name="page" value="">
+        <input type="hidden" name="timezone" value="${esc((() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })())}">
         <button class="btn primary" type="submit">Send me the audit <span class="arr">→</span></button>
         <p class="status" role="status" aria-live="polite"></p>
         <p class="fine">No newsletter. We only use this to send your audit.</p>
@@ -466,7 +467,7 @@
       if (shown) return;
       shown = true; try { sessionStorage.setItem("exitShown", "1"); } catch (err) { /* ignore */ }
       modal.querySelector('[name="source"]').value = source;
-      modal.querySelector('[name="page"]').value = location.href;
+      modal.querySelector('[name="page"]').value = location.pathname + location.search;
       opener = document.activeElement;
       modal.classList.add("open"); document.body.classList.add("modal-open");
       modal.querySelector("input").focus();
@@ -492,6 +493,7 @@
     modal.querySelector("form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = e.target, st = f.querySelector(".status"), data = new FormData(f);
+      if (!data.get("page")) data.set("page", location.pathname + location.search);
       const emailV = String(data.get("email") || "").trim();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailV)) { st.className = "status err"; st.textContent = "Add a valid email so we can send the audit."; f.querySelector('[name="email"]').focus(); return; }
       const success = () => {
@@ -791,6 +793,7 @@
       status.className = "status"; status.textContent = "";
       if (!validate()) { status.textContent = "Fill in the highlighted fields to send."; status.classList.add("err"); form.querySelector("label.invalid input, label.invalid select, label.invalid textarea")?.focus(); return; }
       const data = new FormData(form); const btn = form.querySelector('button[type="submit"]');
+      if (!data.get("page")) data.set("page", location.pathname + location.search);
       if (S.formEndpoint) {
         btn.setAttribute("aria-busy", "true");
         try {
