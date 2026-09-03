@@ -12,8 +12,9 @@
   const cfg = Object.assign({ enabled: true, duration: 7000, oncePerSession: true }, S.intro || {});
   const param = new URLSearchParams(location.search).get("intro");
   if (param === "off" || !cfg.enabled) return;
+  const hold = param && param.indexOf("phase:") === 0 ? param.slice(6) : "";   // ?intro=phase:connect freezes that phase for review
   let seen = false; try { seen = sessionStorage.getItem("introSeen") === "1"; } catch (e) { /* private mode: play it */ }
-  if (seen && cfg.oncePerSession && param !== "1" && param !== "reduced") return;
+  if (seen && cfg.oncePerSession && !param) return;
 
   const reduced = param === "reduced" || root.getAttribute("data-motion") === "reduced" || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const duration = reduced ? 1400 : Math.max(1500, Number(cfg.duration) || 7000);
@@ -29,7 +30,7 @@
       tagline: "AI websites and automations built around how your business works.",
     },
     /* Phase boundaries as fractions of the duration: chaos -> connect -> work -> brand. */
-    phases: [["chaos", 0], ["connect", 0.29], ["work", 0.51], ["brand", 0.71]],
+    phases: [["chaos", 0], ["connect", 0.27], ["work", 0.57], ["brand", 0.73]],
     skipAfter: 2500,      // ms before "Skip intro" appears
     nodes: [   /* label on wide screens, short on phones */
       { label: "Lead",             short: "Lead",      icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
@@ -40,8 +41,12 @@
       { label: "Appointment",      short: "Booking",   icon: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>' },
       { label: "Follow-up",        short: "Follow-up", icon: '<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>' },
     ],
-    scatter: [[14, 24], [80, 16], [30, 80], [88, 66], [50, 34], [8, 62], [66, 84]],  // chaos positions, % of the scene
-    bits: [["Missed call", 40, 12, -6], ["Spreadsheet", 68, 40, 4], ["Unanswered DM", 22, 48, 3], ["Email thread", 58, 64, -4], ["Sticky note", 82, 88, 5], ["Reminder", 36, 96, -3]],
+    /* Manual-work chips: text, resting x/y (% of the scene), tilt (deg), fly-in direction (x/y, -1..1) */
+    bits: [
+      ["Missed call, 6:40 pm", 22, 22, -5, -1, -0.4], ["Spreadsheet, 3 tabs", 74, 18, 4, 1, -0.5], ["DM not answered", 40, 46, 3, -1, 0.2],
+      ["Quote still pending", 66, 52, -3, 1, 0.3], ["Sticky note on the desk", 30, 78, 5, -0.6, 1], ["Reminder: call back", 76, 82, -4, 0.7, 1],
+      ["Same email, again", 52, 8, 2, 0, -1],
+    ],
   };
 
   const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
@@ -55,14 +60,19 @@
     loader.style.setProperty("--ds-intro-ms", duration + "ms");
     if (reduced) loader.setAttribute("data-motion", "reduced");
 
+    const words = (t) => t.split(/\s+/).map((w, i) => '<span class="w" style="--i:' + i + '">' + w + '</span>').join(" ");
+    const letters = (t) => t.split("").map((c, i) => '<span class="l" style="--i:' + i + '">' + c + '</span>').join("");
     const lines = loader.querySelector(".ds-loader-lines");
+    const mark = '<svg class="mk" viewBox="0 0 44 44" aria-hidden="true"><rect class="frame" x="3" y="3" width="38" height="38" rx="11"/><rect class="bar" x="12" y="20" width="20" height="3.5" rx="1.75"/><circle class="dot" cx="15" cy="13.5" r="3"/></svg>';
     lines.append(
-      el("p", null, INTRO.copy.chaos), el("p", null, INTRO.copy.connect), el("p", null, INTRO.copy.work),
-      el("div", "ds-loader-brand", '<span class="mk" aria-hidden="true"></span><b>' + INTRO.copy.brand + '</b><small>' + INTRO.copy.tagline + '</small>')
+      el("p", null, words(INTRO.copy.chaos)), el("p", null, words(INTRO.copy.connect)), el("p", null, words(INTRO.copy.work)),
+      el("div", "ds-loader-brand", mark + '<b>' + letters(INTRO.copy.brand) + '</b><small>' + INTRO.copy.tagline + '</small>')
     );
     lines.children[0].dataset.line = "chaos"; lines.children[1].dataset.line = "connect"; lines.children[2].dataset.line = "work";
 
     const scene = loader.querySelector(".ds-loader-scene");
+    loader.insertBefore(el("div", "ds-loader-floor"), loader.firstChild);
+    loader.insertBefore(el("div", "ds-loader-glow"), loader.firstChild);
     const NS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "ds-loader-wires"); svg.setAttribute("aria-hidden", "true");
@@ -71,9 +81,10 @@
       const d = el("div", "ds-loader-node", '<span class="ic">' + svgIcon(n.icon) + '</span><span class="lb">' + n.label + '</span>');
       d.style.setProperty("--i", i); scene.append(d); return d;
     });
-    INTRO.bits.forEach((bit, i) => {
+    const bits = INTRO.bits.map((bit, i) => {
       const b = el("span", "ds-loader-bit", bit[0]);
-      b.style.setProperty("--x", bit[1]); b.style.setProperty("--y", bit[2]); b.style.setProperty("--r", bit[3] + "deg"); b.style.setProperty("--i", i); scene.append(b);
+      b.style.setProperty("--x", bit[1]); b.style.setProperty("--y", bit[2]); b.style.setProperty("--r", bit[3] + "deg"); b.style.setProperty("--i", i);
+      scene.append(b); return b;
     });
 
     /* Slots: one row on wide screens, a 4 + 3 zigzag on phones. Wires are cubic curves between consecutive slots. */
@@ -101,10 +112,13 @@
       packet.setAttribute("class", "packet"); packet.setAttribute("d", all.trim());
       svg.append(packet);
       packet.style.setProperty("--len", packet.getTotalLength().toFixed(1));
-      nodes.forEach((d, i) => {
-        const x = slots[i][0], y = slots[i][1], sx = INTRO.scatter[i][0], sy = INTRO.scatter[i][1];
-        d.style.setProperty("--x", x); d.style.setProperty("--y", y);
-        d.style.setProperty("--dx", ((sx - x) / 100) * W + "px"); d.style.setProperty("--dy", ((sy - y) / 100) * H + "px");
+      nodes.forEach((d, i) => { d.style.setProperty("--x", slots[i][0]); d.style.setProperty("--y", slots[i][1]); });
+      /* Chips fly in from outside the scene and are later pulled to the middle of the line */
+      const lineY = narrow ? 51 : 50;
+      bits.forEach((b, i) => {
+        const bit = INTRO.bits[i];
+        b.style.setProperty("--fx", Math.round(bit[4] * (W * 0.7 + 200)) + "px"); b.style.setProperty("--fy", Math.round(bit[5] * (H * 0.9 + 160)) + "px");
+        b.style.setProperty("--tx", Math.round(((50 - bit[1]) / 100) * W) + "px"); b.style.setProperty("--ty", Math.round(((lineY - bit[2]) / 100) * H) + "px");
       });
     }
     layout();
@@ -143,7 +157,9 @@
     const tryFinish = () => { if (loaded) finish(false); else window.addEventListener("load", () => finish(false), { once: true }); };
 
     const showSkip = () => { if (!skip.hidden) return; skip.hidden = false; requestAnimationFrame(() => skip.classList.add("show")); };
-    if (reduced) {
+    if (hold) {
+      setPhase(hold); showSkip(); if (bar) bar.style.transform = "scaleX(.5)";
+    } else if (reduced) {
       setPhase("brand");
       showSkip();
       timers.push(setTimeout(tryFinish, duration));

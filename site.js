@@ -2,6 +2,23 @@
 (function () {
   const S = window.SITE || {};
   const D = window.DATA || { icons: {}, solutions: [], cases: [], industries: [] };
+
+  /* Post a form payload to the webhook. If the browser cannot reach it (CORS on a preview or
+     sister domain, a network hiccup), retry once through the same-origin relay
+     (site.config.js -> formProxy). Every form on the site goes through this. */
+  window.DS = window.DS || {};
+  window.DS.postForm = async function (data, endpoint) {
+    const url = endpoint || S.formEndpoint;
+    const attempt = async (u) => {
+      const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
+      try { return await fetch(u, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal }); }
+      finally { clearTimeout(to); }
+    };
+    const proxy = S.formProxy && S.formProxy !== url ? S.formProxy : "";
+    try { const res = await attempt(url); if (res.ok || !proxy) return res; }
+    catch (err) { if (!proxy) throw err; }
+    return attempt(proxy);
+  };
   const page = document.body.dataset.page || "";
   const name = S.name || "[Agency name]";
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -602,9 +619,7 @@
         if (f.dataset.pending === "1") return; // one submission at a time
         f.dataset.pending = "1"; const sb = f.querySelector('button[type="submit"]') || f.querySelector("button"); sb.disabled = true; sb.setAttribute("aria-busy", "true");
         try {
-          const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
-          const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
-          clearTimeout(to);
+          const res = await window.DS.postForm(data, endpoint);
           if (!res.ok) throw new Error("HTTP " + res.status); success();
         } catch (err) { st.className = "status err"; st.textContent = "Something went wrong on our side. Please try again, or email " + (S.email || "us") + " with your website instead."; sb.removeAttribute("aria-busy"); }
         finally { f.dataset.pending = ""; sb.disabled = false; }
@@ -902,9 +917,7 @@
         if (form.dataset.pending === "1") return; // one submission at a time
         form.dataset.pending = "1"; btn.setAttribute("aria-busy", "true"); btn.disabled = true;
         try {
-          const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
-          const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
-          clearTimeout(to);
+          const res = await window.DS.postForm(data);
           if (!res.ok) throw new Error("HTTP " + res.status);
           status.textContent = "Sent. We usually respond within " + (S.responseTime || "24 hours") + "."; status.classList.add("ok"); form.reset();
           // Constant markup only; no user input goes through innerHTML here.

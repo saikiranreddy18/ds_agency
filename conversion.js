@@ -73,9 +73,7 @@
       form.dataset.pending = "1";
       if (btn) { btn.setAttribute("aria-busy", "true"); btn.disabled = true; }
       try {
-        const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
-        const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal });
-        clearTimeout(to);
+        const res = await window.DS.postForm(data);
         if (!res.ok) throw new Error("HTTP " + res.status);
         setStatus(status, okText, "ok"); form.reset(); return true;
       } catch (err) {

@@ -32,6 +32,9 @@ window.SITE = {
   formEndpoint: "https://sai830.app.n8n.cloud/webhook/ds-agency-forms",
   // Optional: send the free-audit modal somewhere else (defaults to formEndpoint).
   auditEndpoint: "",
+  // Same-origin relay (api/form.js on Vercel) used only if the direct post to formEndpoint fails,
+  // e.g. CORS on a preview domain. Leave empty on hosts without serverless functions.
+  formProxy: "/api/form",
   // While true, every payload carries test_mode=true so test submissions can be
   // filtered out downstream. Set to false (or remove) before real traffic.
   testMode: false,

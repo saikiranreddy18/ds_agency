@@ -6,7 +6,7 @@ A short guide for whoever edits the site next. Every animation here has a job. I
 
 ## Intro loader (home page)
 
-`loader.js` + `loader.css`, markup at the top of `index.html`. A 7-second story in four phases: *chaos* (tools scattered, "Most small businesses run on manual work."), *connect* (nodes slide into a flow and the wires draw themselves), *work* ("AI websites + automations that work 24/7."), *brand* (wires turn amber, a packet runs the whole flow, the wordmark and tagline appear), then a 0.45 s fade to the hero. The page loads underneath; the fade waits for `load` if that comes later than the 7 s.
+`loader.js` + `loader.css`, markup at the top of `index.html`. A 7-second story in four phases on a perspective grid: *chaos* (manual-work chips fly in from the edges and pile up, each with a pulsing amber "unread" dot; "Most small businesses run on manual work." rises word by word), *connect* (the chips are pulled into one line and vanish while the seven steps pop in one after another, each wire drawing right behind its step), *work* (steps light amber in a wave, a packet starts running the flow on loop, "AI websites + automations that work 24/7."), *brand* (the scene settles back, the DS mark draws itself, the wordmark letters land, the tagline fades in), then a 0.5 s fade to the hero. The page loads underneath; the fade waits for `load` if that comes later than the 7 s. Review any phase frozen with `?intro=phase:chaos`, `phase:connect`, `phase:work` or `phase:brand`.
 
 - **Adjust:** `site.config.js -> intro` sets `enabled`, `duration` (ms) and `oncePerSession`. Copy and the phase split live at the top of `loader.js` (`INTRO`).
 - **Test:** `index.html?intro=1` replays it, `?intro=reduced` shows the reduced-motion version, `?intro=off` skips it.
