@@ -494,6 +494,7 @@
       e.preventDefault();
       const f = e.target, st = f.querySelector(".status"), data = new FormData(f);
       if (!data.get("page")) data.set("page", location.pathname + location.search);
+      data.set("test_mode", S.testMode ? "true" : "false");
       const emailV = String(data.get("email") || "").trim();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailV)) { st.className = "status err"; st.textContent = "Add a valid email so we can send the audit."; f.querySelector('[name="email"]').focus(); return; }
       const success = () => {
@@ -794,6 +795,7 @@
       if (!validate()) { status.textContent = "Fill in the highlighted fields to send."; status.classList.add("err"); form.querySelector("label.invalid input, label.invalid select, label.invalid textarea")?.focus(); return; }
       const data = new FormData(form); const btn = form.querySelector('button[type="submit"]');
       if (!data.get("page")) data.set("page", location.pathname + location.search);
+      data.set("test_mode", S.testMode ? "true" : "false");
       if (S.formEndpoint) {
         btn.setAttribute("aria-busy", "true");
         try {

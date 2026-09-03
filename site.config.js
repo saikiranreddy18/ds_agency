@@ -30,6 +30,9 @@ window.SITE = {
   formEndpoint: "",
   // Optional: send the free-audit modal somewhere else (defaults to formEndpoint).
   auditEndpoint: "",
+  // While true, every payload carries test_mode=true so test submissions can be
+  // filtered out downstream. Set to false (or remove) before real traffic.
+  testMode: true,
 
   // Where you work. Shown in the footer and About page.
   base: "India",

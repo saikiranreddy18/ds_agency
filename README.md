@@ -52,7 +52,7 @@ Deliberately not built: animated counters with invented numbers, a "recent wins"
 
 ## Conversion layer
 
-`conversion.js` + `conversion.css` hold the engagement mechanics added on top of the site: micro-qualifier (`?focus=`), sticky solutions bar, "Tell us your workflow" modal, "Send me this by email" mini-capture forms, kinetic section headlines, term tooltips, board tap ripple. `site.js` holds Build Your Stack presets and progress, ROI presets/diagram/estimate, the audit modal (exit-intent on desktop, scroll-depth + time on touch), related solutions/industries on detail pages, and the booking success panel. Every form carries a `source` field. **`DS-Agency-effects-and-hooks.txt`** maps each effect and every automation plug-in point to its file and selector.
+`conversion.js` + `conversion.css` hold the engagement mechanics added on top of the site: micro-qualifier (`?focus=`), sticky solutions bar, "Tell us your workflow" modal, "Send me this by email" mini-capture forms, kinetic section headlines, term tooltips, board tap ripple. `site.js` holds Build Your Stack presets and progress, ROI presets/diagram/estimate, the audit modal (exit-intent on desktop, scroll-depth + time on touch), related solutions/industries on detail pages, and the booking success panel. Every form carries `source`, `page`, `timezone` and `test_mode`. **`HANDOFF.md`** is the production handoff: config, payload shape, source tags, sheet columns, go-live checklist. **`DS-Agency-effects-and-hooks.txt`** maps each effect and every automation plug-in point to its file and selector.
 
 ## Site assistant (AI chat)
 

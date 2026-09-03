@@ -57,6 +57,7 @@
     if (!data.get("source")) data.set("source", getSourceForForm(form));
     if (!data.get("page")) data.set("page", location.pathname + location.search);
     if (!data.get("timezone") && timezone) data.set("timezone", timezone);
+    data.set("test_mode", S.testMode ? "true" : "false"); // filter test submissions downstream
     setStatus(status, "", "");
     if (S.formEndpoint) {
       if (btn) btn.setAttribute("aria-busy", "true");
