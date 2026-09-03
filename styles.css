@@ -270,11 +270,14 @@ body.menu-open { overflow: hidden; }
 .hero-top + .hero .trust-row { margin-top: var(--s3); }
 
 .hero-top-orbit { position: absolute; inset: -6% 0 -4%; pointer-events: none; z-index: 0; }
+/* Each owner starts small and hidden at the headline (--ox/--oy point from its slot back to the centre,
+   set by site.js), then, once the headline has landed, travels out to its slot. Paused under the intro. */
 .orb {
   position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); display: grid; justify-items: center; gap: 8px;
-  transform: translate(-50%, -50%); opacity: 0;
-  animation: orbIn .8s var(--ease) calc(.3s + var(--i) * .12s) forwards;
+  opacity: 0; transform: translate(-50%, -50%) translate(var(--ox, 0px), var(--oy, 0px)) scale(.2);
+  animation: orbOut 1.15s cubic-bezier(.2, .8, .2, 1) calc(1.2s + var(--i) * .13s) forwards;
 }
+html.intro-on .orb { animation-play-state: paused; }
 .orb .av {   /* illustrated owner avatar (SVG from site.js), clipped to a circle with a tinted ring */
   width: 68px; height: 68px; border-radius: 50%; overflow: hidden; display: block;
   background: hsl(var(--h) 60% 52% / .16); border: 2px solid hsl(var(--h) 60% 62% / .55);
@@ -287,7 +290,11 @@ body.menu-open { overflow: hidden; }
   padding: 6px 10px; border-radius: 999px; background: var(--bg-1); border: 1px solid var(--line);
 }
 .orb.swap .av, .orb.swap .tag { animation: orbSwap .6s var(--ease); }
-@keyframes orbIn { from { opacity: 0; transform: translate(-50%, -40%) scale(.7); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes orbOut {
+  0%   { opacity: 0; transform: translate(-50%, -50%) translate(var(--ox, 0px), var(--oy, 0px)) scale(.2); }
+  25%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+}
 @keyframes orbFloat { from { transform: translateY(-6px); } to { transform: translateY(8px); } }
 @keyframes orbSwap { 0% { opacity: 1; transform: scale(1); } 40% { opacity: 0; transform: scale(.85); } 60% { opacity: 0; transform: scale(.85); } 100% { opacity: 1; transform: scale(1); } }
 :root[data-theme="light"] .orb .av { background: hsl(var(--h) 60% 50% / .14); border-color: hsl(var(--h) 55% 55% / .5); }
@@ -298,8 +305,8 @@ body.menu-open { overflow: hidden; }
   .hero-top-form input { text-align: center; padding: 12px; }
   .hero-top-form .btn { justify-content: center; }
 }
-@media (prefers-reduced-motion: reduce) { .orb { animation: none; opacity: 1; } .orb .av { animation: none; } .orb.swap .av, .orb.swap .tag { animation: none; } }
-:root[data-motion="reduced"] .orb { animation: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .orb { animation: none; opacity: 1; transform: translate(-50%, -50%); } .orb .av { animation: none; } .orb.swap .av, .orb.swap .tag { animation: none; } }
+:root[data-motion="reduced"] .orb { animation: none; opacity: 1; transform: translate(-50%, -50%); }
 :root[data-motion="reduced"] .orb .av, :root[data-motion="reduced"] .orb.swap .av, :root[data-motion="reduced"] .orb.swap .tag { animation: none; }
 
 .hero { padding: clamp(var(--s5), 8vw, var(--s7)) 0 clamp(var(--s5), 6vw, var(--s6)); position: relative; }

@@ -304,6 +304,15 @@
     const setFace = (av, item) => { av.innerHTML = ""; const f = face(item); if (typeof f === "string") av.innerHTML = f; else av.append(f); av.style.setProperty("--h", item.hue); };
     el.innerHTML = ORBIT_SLOTS.map((pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av"></span><span class="tag">${esc(OWNERS[i].label)}</span></div>`).join("");
     el.querySelectorAll(".orb .av").forEach((av, i) => setFace(av, OWNERS[i]));
+    /* Start point of the fly-out: the headline, a little above the container's centre. */
+    const aim = () => {
+      const W = el.clientWidth || 1200, H = el.clientHeight || 600, cx = W * 0.5, cy = H * 0.42;
+      el.querySelectorAll(".orb").forEach((o, i) => {
+        const sx = (ORBIT_SLOTS[i][0] / 100) * W, sy = (ORBIT_SLOTS[i][1] / 100) * H;
+        o.style.setProperty("--ox", Math.round(cx - sx) + "px"); o.style.setProperty("--oy", Math.round(cy - sy) + "px");
+      });
+    };
+    aim();
     OWNERS.slice(ORBIT_SLOTS.length).forEach((o) => { if (o.photo) { const pre = new Image(); pre.src = PHOTO(o.photo); } });   // warm the cache for the swaps
     if (reduced) return;
     let next = ORBIT_SLOTS.length, busy = false;
