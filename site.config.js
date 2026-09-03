@@ -22,9 +22,14 @@ window.SITE = {
     deepDive: "",
   },
 
-  // Contact form endpoint. Works with https://web3forms.com (free) or
-  // https://formspree.io. Leave empty to fall back to a mailto link.
+  // Form endpoint. Works with https://web3forms.com (free), https://formspree.io,
+  // or an n8n / Make webhook. Every form posts here with a `source` field:
+  // contact_page, exit_intent_audit, mobile_engagement, workflow_modal,
+  // roi_email_capture, build_stack_email, solution_detail_email,
+  // case_study_email, recommend_email. Leave empty to fall back to a mailto link.
   formEndpoint: "",
+  // Optional: send the free-audit modal somewhere else (defaults to formEndpoint).
+  auditEndpoint: "",
 
   // Where you work. Shown in the footer and About page.
   base: "India",

@@ -242,8 +242,9 @@
     const webF = form.querySelector('[name="website"]'); if (webF) webF.value = fixUrl(webF.value);
     const summary = summaryFor(kind, form);
     if (kind === "stack" && !summary) { setStatus(status, "Pick an industry and a goal first. Then we can send the stack.", "err"); return; }
-    // PLUG IN: the automation endpoint receives kind, summary, page and source=capture_<kind>.
-    await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, page: location.href, source: "capture_" + kind }, okText: "Done. We'll email this within " + RT + ".", btn, status });
+    // PLUG IN: the automation endpoint receives kind, summary, page and a source tag per form.
+    const SOURCE = { stack: "build_stack_email", roi: "roi_email_capture", solution: "solution_detail_email", case: "case_study_email", recommend: "recommend_email" };
+    await deliver(form, { subject: "Send by email: " + kind, extra: { kind, summary, page: location.href, source: SOURCE[kind] || ("capture_" + kind) }, okText: "Done. We'll email this within " + RT + ".", btn, status });
   });
   document.addEventListener("input", (e) => { const t = e.target; if (t && t.classList && t.classList.contains("invalid")) t.classList.remove("invalid"); });
 
@@ -299,6 +300,32 @@
       });
     }, { threshold: 0.4 });
     heads.forEach((h) => kio.observe(h));
+  }
+
+  /* ---------------------------------------------------------------
+     FAQ open/close animation for browsers without CSS
+     interpolate-size (styles.css animates ::details-content natively
+     where supported). Native <details> keeps working without JS.
+  --------------------------------------------------------------- */
+  const supportsDetailsAnim = typeof CSS !== "undefined" && CSS.supports && CSS.supports("interpolate-size", "allow-keywords");
+  if (!supportsDetailsAnim && !reduced() && "animate" in Element.prototype) {
+    document.querySelectorAll(".faq details").forEach((d) => {
+      const summary = d.querySelector("summary"), body = d.querySelector("p");
+      if (!summary || !body) return;
+      summary.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (d.open) {
+          const h = body.getBoundingClientRect().height;
+          body.style.overflow = "hidden";
+          body.animate([{ height: h + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 220, easing: "ease" }).onfinish = () => { d.open = false; body.style.overflow = ""; };
+        } else {
+          d.open = true;
+          const h = body.getBoundingClientRect().height;
+          body.style.overflow = "hidden";
+          body.animate([{ height: "0px", opacity: 0 }, { height: h + "px", opacity: 1 }], { duration: 260, easing: "ease" }).onfinish = () => { body.style.overflow = ""; };
+        }
+      });
+    });
   }
 
   /* ---------------------------------------------------------------

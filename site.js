@@ -498,9 +498,10 @@
         f.innerHTML = `<p class="status ok" role="status">We'll send your automation audit to <b>${esc(emailV)}</b> within ${esc(RT)}.</p>
           <a class="btn primary" href="book.html" style="justify-content:center">Book a live walkthrough instead <span class="arr">→</span></a>`;
       };
-      if (S.formEndpoint) {
+      const endpoint = S.auditEndpoint || S.formEndpoint; // PLUG IN: audit requests can go to their own endpoint
+      if (endpoint) {
         f.querySelector("button").setAttribute("aria-busy", "true");
-        try { const res = await fetch(S.formEndpoint, { method: "POST", body: data, headers: { Accept: "application/json" } }); if (!res.ok) throw new Error("HTTP " + res.status); success(); }
+        try { const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" } }); if (!res.ok) throw new Error("HTTP " + res.status); success(); }
         catch (err) { st.className = "status err"; st.textContent = "Could not send. Email " + (S.email || "us") + " with your website instead."; f.querySelector("button").removeAttribute("aria-busy"); }
       } else {
         location.href = "mailto:" + (S.email || "") + "?subject=" + encodeURIComponent("Free automation audit") + "&body=" + encodeURIComponent("Website: " + data.get("website") + "\nBiggest bottleneck: " + (data.get("bottleneck") || "not given") + "\nMessage: " + (data.get("message") || "-") + "\nEmail: " + emailV);

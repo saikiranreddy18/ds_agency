@@ -18,15 +18,18 @@ body. Set it to a Web3Forms / Formspree URL, or an n8n / Make webhook, and
 every form below POSTs multipart FormData with these fields:
 
   Form                      File / selector                          Fields (plus _subject)                                   source=
-  Contact form              contact.html form.contact · site.js       name,email,company,country,website,industry,automate,   contact_form
+  Contact form              contact.html form.contact · site.js       name,email,company,country,website,industry,automate,   contact_page
                                                                        message,source_page,timezone
   Audit modal (exit intent) site.js "#audit-modal" (also on touch      website,email,bottleneck,message,page                    exit_intent_audit |
-    / mobile engagement)    after 50% scroll + 25 s)                                                                            mobile_engagement
+    / mobile engagement)    after 50% scroll + 25 s). Posts to                                                                 mobile_engagement
+                            SITE.auditEndpoint if set, else formEndpoint
   Workflow modal            conversion.js "#workflow-modal"           website,email,goal,message,page                          workflow_modal
-  Mini-capture forms        conversion.js document submit handler     email,website,[goal],kind,summary,page                   capture_<kind>
-    kinds: stack (Build Your Stack), roi (ROI calculator), solution
-    (solution detail), case (case-study detail), recommend (home
-    mid-page block + solutions page inline form)
+  Mini-capture forms        conversion.js document submit handler     email,website,[goal],kind,summary,page
+    Build Your Stack                                                                                                            build_stack_email
+    ROI calculator                                                                                                              roi_email_capture
+    Solution detail                                                                                                             solution_detail_email
+    Case-study detail                                                                                                           case_study_email
+    Recommend (home mid-page block, solutions page inline form)                                                                 recommend_email
   Chat assistant            chat.js → POST /api/chat (api/chat.js on   messages[],context,page                                 —
                             Vercel with GROQ_API_KEY; dev-server.py
                             locally). No key → rule-based fallback.
