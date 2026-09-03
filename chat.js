@@ -86,6 +86,10 @@
 
   let history = []; try { history = JSON.parse(sessionStorage.getItem("chatHistory") || "[]"); } catch (e) { /* ignore */ }
   let backend = null; // null = unknown, true = live, false = fallback
+  /* Endpoints in order of preference: the site's own /api/chat, then an optional fallback on a sister
+     deployment (site.config.js → chat.fallbackEndpoint). The first one that answers is remembered. */
+  const endpoints = [cfg.endpoint, cfg.fallbackEndpoint].filter(Boolean);
+  let epIndex = 0;
   const save = () => { try { sessionStorage.setItem("chatHistory", JSON.stringify(history.slice(-12))); } catch (e) { /* ignore */ } };
   const add = (role, text) => { const el = document.createElement("div"); el.className = "msg " + role; el.innerHTML = role === "bot" ? md(text) : `<p>${esc(text)}</p>`; log.append(el); log.scrollTop = log.scrollHeight; return el; };
   const open = (o) => { panel.hidden = !o; launch.setAttribute("aria-expanded", String(o)); root.classList.toggle("open", o); if (o) { if (!log.children.length) { history.length ? history.forEach((m) => add(m.role === "assistant" ? "bot" : "user", m.content)) : add("bot", `Hi. I answer questions about what ${agency} builds, for which businesses, and how the process works. What would you like to know?`); } input.focus(); } };
@@ -99,13 +103,18 @@
     const typing = add("bot", "…"); typing.classList.add("typing");
     let answer = "", live = false;
     if (backend !== false) {
-      try {
-        const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 20000);
-        const res = await fetch(cfg.endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history.slice(-10), context: CONTEXT, page: location.pathname }), signal: ctrl.signal });
-        clearTimeout(to);
-        if (res.ok) { const j = await res.json(); if (j && j.reply) { answer = j.reply; live = true; backend = true; } else if (j && j.error === "not_configured") { backend = false; } }
-        else backend = false;
-      } catch (e) { backend = false; }
+      const body = JSON.stringify({ messages: history.slice(-10), context: CONTEXT, page: location.pathname });
+      while (epIndex < endpoints.length && !live) {
+        try {
+          const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 20000);
+          const res = await fetch(endpoints[epIndex], { method: "POST", headers: { "Content-Type": "application/json" }, body, signal: ctrl.signal });
+          clearTimeout(to);
+          const j = res.ok ? await res.json() : null;
+          if (j && j.reply) { answer = j.reply; live = true; backend = true; }
+          else epIndex++; // not configured, upstream error or 404 here: try the next endpoint
+        } catch (e) { epIndex++; }
+      }
+      if (!live) backend = false;
     }
     if (!live) answer = localAnswer(q);
     mode.textContent = live ? "AI answers grounded in this site's content" : "Answers from this site's content";

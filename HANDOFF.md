@@ -13,6 +13,8 @@ There are **two Vercel projects** deploying this repo:
 
 The key was added to `ds-agency-siak`. Add the same key to `ds-agency` (Settings → Environment Variables → Production) and redeploy, or delete the duplicate project and point the domain at the one that has the key. Check with `GET /api/chat` on the domain: `configured` must be `true` and `model` must show a model id.
 
+Until the key is on `ds-agency`, the widget falls back to `chat.fallbackEndpoint` in `site.config.js`, which points at the `ds-agency-siak` function (CORS allows the site's origins). So chat works on the live site either way; remove the fallback once the key is in place.
+
 Models: Groq moved `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` to enterprise-only in 2026, so the function no longer hard-codes a model. It asks Groq's `/models` list and picks the first available from its preference list (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, Llama 3.3/4, Qwen 3, Kimi, `groq/compound-mini`), and retries once with the next model if the chosen one disappears. Set `CHAT_MODEL` only if you want to pin one.
 
 ## 0. Live status (2026-09-03)

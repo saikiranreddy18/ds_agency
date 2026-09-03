@@ -29,6 +29,21 @@ const findKey = () => { for (const n of KEY_NAMES) { const v = (process.env[n] |
 const seenNames = () => Object.keys(process.env).filter((k) => /^GROQ/i.test(k));
 const BASE = () => (process.env.CHAT_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
 
+/* CORS: the site may call this function on a sister Vercel project (see site.config.js → chat.fallbackEndpoint),
+   so allow the site's own origins. CHAT_ALLOWED_ORIGINS (comma-separated) extends the list. */
+const ALLOWED_ORIGINS = ["https://ds-agency.vercel.app", "https://ds-agency-in.vercel.app", "https://saikiranreddy18.github.io", "http://localhost:8085"]
+  .concat((process.env.CHAT_ALLOWED_ORIGINS || "").split(",").map((s) => s.trim()).filter(Boolean));
+function cors(req, res) {
+  const origin = req.headers.origin || "";
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Max-Age", "86400");
+  }
+}
+
 /* Model choice. Groq moves models between free, preview and enterprise tiers, so a hard-coded id
    goes stale (llama-3.3-70b became enterprise-only in 2026). Ask /models and take the first match. */
 const PREFERRED = [
@@ -72,6 +87,8 @@ const isModelError = (t) => /model_not_found|does not exist|decommissioned|depre
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  cors(req, res);
+  if (req.method === "OPTIONS") { res.status(204).end(); return; }
   const env = process.env.VERCEL_ENV || "unknown";
   if (req.method === "GET") {
     // Health check: GET /api/chat → key present, which GROQ* names exist, and the model the next call would use.

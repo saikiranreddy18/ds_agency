@@ -49,5 +49,8 @@ window.SITE = {
   chat: {
     enabled: true,
     endpoint: "/api/chat",
+    // Used only if `endpoint` reports no key: the sister Vercel project (ds-agency-siak) that has
+    // GROQ_API_KEY. Remove once the key is set on the ds-agency project itself.
+    fallbackEndpoint: "https://ds-agency-in.vercel.app/api/chat",
   },
 };
