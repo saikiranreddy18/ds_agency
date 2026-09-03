@@ -4,6 +4,16 @@ _Last reviewed 2026-09-03. Matches the live site as of that date; `git log -- EF
 
 A short guide for whoever edits the site next. Every animation here has a job. If a new one does not fit one of the three jobs below, leave it out.
 
+## Intro loader (home page)
+
+`loader.js` + `loader.css`, markup at the top of `index.html`. A 7-second story in four phases: *chaos* (tools scattered, "Most small businesses run on manual work."), *connect* (nodes slide into a flow and the wires draw themselves), *work* ("AI websites + automations that work 24/7."), *brand* (wires turn amber, a packet runs the whole flow, the wordmark and tagline appear), then a 0.45 s fade to the hero. The page loads underneath; the fade waits for `load` if that comes later than the 7 s.
+
+- **Adjust:** `site.config.js -> intro` sets `enabled`, `duration` (ms) and `oncePerSession`. Copy and the phase split live at the top of `loader.js` (`INTRO`).
+- **Test:** `index.html?intro=1` replays it, `?intro=reduced` shows the reduced-motion version, `?intro=off` skips it.
+- **Skip:** a "Skip intro" button appears at 2.5 s; Escape also skips. Reduced motion (system setting or the footer switch) shows only the wordmark and tagline for 1.4 s with the skip visible at once.
+- **Analytics:** `intro_complete` / `intro_skip` events with `after` (ms) go through `DS.track`; a `ds:intro` DOM event fires too.
+- **Why 7 s:** it was asked for as a designed intro. If bounce on the home page rises, the first thing to try is `duration: 4000`.
+
 ## Why motion exists on this site
 
 1. **Reveal structure.** Sections fade and slide in as they enter the viewport so the page reads in order. Timing is 0.5–0.6 s with a gentle ease, staggered by at most 0.24 s.

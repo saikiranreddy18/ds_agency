@@ -1,0 +1,129 @@
+/* ==================================================================
+   Intro loader (home page). A 7-second story: scattered manual work,
+   the flow wiring itself together, then the DS Agency wordmark.
+
+   - Timing and copy: loader.js (INTRO.copy, INTRO.phases).
+   - Duration / disable / once-per-session: site.config.js -> intro.
+   - Only rendered while <html class="intro-on">; loader.js adds that
+     class synchronously in <head>, so the overlay paints first.
+   - Uses the site tokens, so the light theme works unchanged.
+================================================================== */
+html.intro-on { overflow: hidden; }
+html.intro-on .hero .kinetic .w { animation-play-state: paused; }   /* headline words wait for the reveal */
+
+.ds-loader { display: none; }
+html.intro-on .ds-loader { display: grid; }
+.ds-loader {
+  position: fixed; inset: 0; z-index: 1000; place-items: center; padding: 24px;
+  background: var(--bg-0); color: var(--text);
+  opacity: 1; transition: opacity .45s var(--ease);
+}
+.ds-loader::before {   /* faint amber mesh, same family as the hero */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60% 50% at 50% 60%, var(--accent-dim), transparent 70%); opacity: .6;
+}
+.ds-loader.out { opacity: 0; pointer-events: none; }
+.ds-loader .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.ds-loader-content { position: relative; width: min(960px, 100%); display: grid; gap: clamp(18px, 4vh, 40px); justify-items: center; }
+
+/* ---- Lines of copy: one per phase, cross-faded ---- */
+.ds-loader-lines {
+  position: relative; width: 100%; min-height: 3.4em; text-align: center;
+  font-family: var(--display); font-weight: 700; font-size: clamp(1.2rem, 2.6vw, 1.9rem); letter-spacing: -0.02em; line-height: 1.25;
+}
+.ds-loader-lines p { position: absolute; inset: 0; margin: 0; padding: 0 8px; opacity: 0; transform: translateY(10px); transition: opacity .55s var(--ease), transform .55s var(--ease); }
+.ds-loader[data-phase="chaos"]   p[data-line="chaos"],
+.ds-loader[data-phase="connect"] p[data-line="connect"],
+.ds-loader[data-phase="work"]    p[data-line="work"] { opacity: 1; transform: none; }
+
+/* ---- Brand block (final phase) ---- */
+.ds-loader-brand { position: absolute; inset: 0; display: grid; justify-items: center; align-content: center; gap: 10px; opacity: 0; transform: translateY(10px) scale(.98); transition: opacity .6s var(--ease) .1s, transform .6s var(--ease) .1s; }
+.ds-loader[data-phase="brand"] .ds-loader-brand { opacity: 1; transform: none; }
+.ds-loader-brand .mk { position: relative; width: 36px; height: 36px; border-radius: 10px; background: var(--accent); box-shadow: 0 0 0 6px var(--accent-dim), 0 12px 40px -10px var(--accent); }
+.ds-loader-brand .mk::before { content: ""; position: absolute; left: 8px; right: 8px; top: 16px; height: 3px; border-radius: 2px; background: var(--bg-0); }
+.ds-loader-brand .mk::after { content: ""; position: absolute; left: 8px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--bg-0); }
+.ds-loader-brand b { font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 4.4vw, 3rem); letter-spacing: -0.03em; line-height: 1; }
+.ds-loader-brand small { font-weight: 400; font-size: clamp(.95rem, 1.5vw, 1.1rem); color: var(--text-2); max-width: 34rem; line-height: 1.45; }
+
+/* ---- Scene: nodes + wires ---- */
+.ds-loader-scene { position: relative; width: 100%; height: clamp(210px, 34vh, 320px); }
+.ds-loader-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ds-loader-wires .wire {   /* --len (px) is set by loader.js from getTotalLength() */
+  fill: none; stroke: var(--line-2); stroke-width: 1.5; stroke-linecap: round;
+  stroke-dasharray: calc(var(--len, 1000) * 1px); stroke-dashoffset: calc(var(--len, 1000) * 1px);
+  transition: stroke-dashoffset .9s var(--ease) calc(var(--i) * .14s + .15s), stroke .6s, opacity .6s;
+}
+.ds-loader[data-phase="connect"] .wire, .ds-loader[data-phase="work"] .wire, .ds-loader[data-phase="brand"] .wire { stroke-dashoffset: 0; }
+.ds-loader[data-phase="work"] .wire { stroke: var(--text-2); }
+.ds-loader[data-phase="brand"] .wire { stroke: var(--accent); opacity: .55; }
+.ds-loader-wires .packet {   /* a short bright dash that travels the whole flow once */
+  fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: calc(var(--len, 1000) * .08px) calc(var(--len, 1000) * 1px); stroke-dashoffset: calc(var(--len, 1000) * .08px);
+  opacity: 0; filter: drop-shadow(0 0 6px var(--accent));
+}
+.ds-loader[data-phase="brand"] .packet { opacity: 1; animation: dsPacket 1.5s cubic-bezier(.4,0,.2,1) .15s 1 forwards; }
+@keyframes dsPacket { from { stroke-dashoffset: calc(var(--len, 1000) * .08px); } to { stroke-dashoffset: calc(var(--len, 1000) * -1px); } }
+
+.ds-loader-node {
+  position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: 0; height: 0;
+  transform: translate(var(--dx, 0px), var(--dy, 0px));
+  transition: transform 1.1s var(--ease) calc(var(--i) * .07s);
+}
+.ds-loader:not([data-phase="chaos"]) .ds-loader-node { transform: none; }
+.ds-loader-node .ic {
+  position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line-2); background: var(--bg-1); color: var(--muted);
+  transition: border-color .5s, color .5s, box-shadow .7s var(--ease), transform .5s var(--ease);
+}
+.ds-loader-node .ic svg { width: 22px; height: 22px; }
+.ds-loader-node .lb {
+  position: absolute; top: 32px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  opacity: .8; transition: color .5s, opacity .5s;
+}
+.ds-loader[data-phase="chaos"] .ds-loader-node .ic { animation: dsDrift 3.2s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.55s); }
+.ds-loader[data-phase="work"] .ds-loader-node .ic, .ds-loader[data-phase="connect"] .ds-loader-node .ic { color: var(--text); border-color: var(--text-2); }
+.ds-loader[data-phase="work"] .ds-loader-node .lb { color: var(--text-2); opacity: 1; }
+.ds-loader[data-phase="brand"] .ds-loader-node .ic { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-dim), 0 0 26px -4px var(--accent); }
+.ds-loader[data-phase="brand"] .ds-loader-node .lb { color: var(--text-2); opacity: 1; }
+@keyframes dsDrift { from { transform: translate(0, 0) rotate(0); } to { transform: translate(4px, -5px) rotate(3deg); } }
+
+/* Manual-work chips: float in the chaos phase, dissolve when the system forms */
+.ds-loader-bit {
+  position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  padding: 6px 10px; border: 1px dashed var(--line-2); border-radius: 999px; background: var(--bg-0);
+  font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  opacity: .9; transition: opacity .6s var(--ease), transform .8s var(--ease);
+  animation: dsDrift 3.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.7s);
+}
+.ds-loader:not([data-phase="chaos"]) .ds-loader-bit { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(.85); }
+
+/* ---- Progress + skip ---- */
+.ds-loader-bar { width: min(320px, 60%); height: 2px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.ds-loader-bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; }   /* scaleX set by loader.js each frame */
+.ds-loader-skip {
+  position: absolute; right: 24px; bottom: 24px; padding: 10px 16px; border-radius: 999px; cursor: pointer;
+  font: 500 .85rem/1 inherit; font-family: inherit; color: var(--text-2); background: var(--bg-1); border: 1px solid var(--line-2);
+  opacity: 0; transform: translateY(6px); transition: opacity .35s var(--ease), transform .35s var(--ease), border-color .2s, color .2s;
+}
+.ds-loader-skip.show { opacity: 1; transform: none; }
+.ds-loader-skip:hover { border-color: var(--accent); color: var(--text); }
+.ds-loader-skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---- Reduced motion: wordmark + tagline only, skip available at once ---- */
+.ds-loader[data-motion="reduced"] * { transition: none !important; animation: none !important; }
+.ds-loader[data-motion="reduced"] .ds-loader-scene, .ds-loader[data-motion="reduced"] .ds-loader-bar, .ds-loader[data-motion="reduced"] .ds-loader-lines p { display: none; }
+.ds-loader[data-motion="reduced"] .ds-loader-brand { opacity: 1; transform: none; }
+.ds-loader[data-motion="reduced"] .ds-loader-skip { opacity: 1; transform: none; }
+.ds-loader[data-motion="reduced"] { transition: opacity .3s; }
+
+@media (max-width: 640px) {
+  .ds-loader { padding: 16px; }
+  .ds-loader-scene { height: 300px; }
+  .ds-loader-node .ic { left: -22px; top: -22px; width: 44px; height: 44px; }
+  .ds-loader-node .ic svg { width: 19px; height: 19px; }
+  .ds-loader-node .lb { top: 27px; font-size: .58rem; }
+  .ds-loader-bit { font-size: .58rem; padding: 5px 8px; }
+  .ds-loader-skip { right: 16px; bottom: 16px; }
+}

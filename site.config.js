@@ -46,6 +46,14 @@ window.SITE = {
   // Site assistant (chat widget). The model key lives on the server
   // (GROQ_API_KEY env var for api/chat.js on Vercel, or dev-server.py locally).
   // With no backend the widget answers from built-in rules over the site content.
+  // Home-page intro (loader.js + loader.css): a 7-second story before the hero.
+  // enabled: false removes it entirely; duration in ms; oncePerSession: play only the first time in a tab.
+  intro: {
+    enabled: true,
+    duration: 7000,
+    oncePerSession: true,
+  },
+
   chat: {
     enabled: true,
     endpoint: "/api/chat",
