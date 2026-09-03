@@ -2,12 +2,23 @@
 
 Everything a visitor can submit on the DS Agency site, what arrives at your webhook, and how to switch from testing to production. Verified end to end on 2026-09-03 with the local echo endpoint.
 
+## 0. Live status (2026-09-03)
+
+Forms are wired to n8n and verified end to end:
+
+- **Webhook:** `https://sai830.app.n8n.cloud/webhook/ds-agency-forms` (set as `formEndpoint`).
+- **Workflow:** "DS Agency website forms → email" · https://sai830.app.n8n.cloud/workflow/9fdhU4I3xUTSbqmQ · published.
+  Webhook (CORS for ds-agency.vercel.app, the GitHub Pages site and localhost) → Normalize submission → in parallel: Gmail send (credential "Gmail account 2"; 3 retries; continue on fail) and insert into the **"DS Agency leads" data table** (so nothing is lost if mail fails).
+- **Notification address:** `dkai3782@gmail.com`, set in the "Normalize submission" node (`notify_to`). Reply-to is the visitor's email, so replying in Gmail answers them directly. Subjects: `[DS Agency] <source> · <email>`, prefixed `[TEST]` while `testMode` is on.
+- The webhook rejects non-browser user agents (bot filter). Browsers are fine; when testing with curl, pass a browser User-Agent.
+- The original "Gmail account" credential in n8n has expired; reconnect it there if you ever want to switch back.
+
 ## 1. Config (`site.config.js`)
 
 ```js
 window.SITE = {
   // ...existing config
-  formEndpoint: "https://api.web3forms.com/submit",   // or an n8n / Make webhook URL
+  formEndpoint: "https://sai830.app.n8n.cloud/webhook/ds-agency-forms",  // n8n; Web3Forms/Formspree/Make also work
   auditEndpoint: "",                                  // optional: separate endpoint for the audit modal
   testMode: true,                                     // set false before real traffic
 };

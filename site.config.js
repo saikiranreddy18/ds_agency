@@ -27,7 +27,9 @@ window.SITE = {
   // contact_page, exit_intent_audit, mobile_engagement, workflow_modal,
   // roi_email_capture, build_stack_email, solution_detail_email,
   // case_study_email, recommend_email. Leave empty to fall back to a mailto link.
-  formEndpoint: "",
+  // n8n workflow "DS Agency website forms → email": emails each submission and stores it
+  // in the "DS Agency leads" data table. https://sai830.app.n8n.cloud/workflow/9fdhU4I3xUTSbqmQ
+  formEndpoint: "https://sai830.app.n8n.cloud/webhook/ds-agency-forms",
   // Optional: send the free-audit modal somewhere else (defaults to formEndpoint).
   auditEndpoint: "",
   // While true, every payload carries test_mode=true so test submissions can be
