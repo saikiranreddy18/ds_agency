@@ -7,7 +7,7 @@ window.SITE = {
   name: "DS Agency",
 
   // Contact details. Leave a value empty ("") to hide that option.
-  email: "hello@example.com",
+  email: "saikiranreddytallapureddy@gmail.com",
   whatsapp: "",            // international format, digits only, e.g. "919876543210"
   linkedin: "",            // full URL, e.g. "https://www.linkedin.com/company/your-agency"
 

@@ -29,13 +29,30 @@
   </div>
   <script>if (window.DSIntro) window.DSIntro.build();</script>
 
-  <!-- 01 Hero -->
+  <!-- 00 Top hero: one question, one field. The floating "orbit" bubbles are rendered by site.js (renderOrbit). -->
+  <section class="hero-top" id="top">
+    <div class="wrap">
+      <div class="hero-top-orbit" aria-hidden="true" data-render="hero-orbit"></div>
+      <div class="hero-top-inner">
+        <p class="eyebrow">AI automation agency</p>
+        <h1 class="hero-top-title">AI websites and automations, built around how your business runs.</h1>
+        <form class="hero-top-form" novalidate>
+          <label class="sr-only" for="hero-site">Your website</label>
+          <input id="hero-site" name="website" type="text" inputmode="url" autocomplete="url" placeholder="yourbusiness.com" spellcheck="false">
+          <button class="btn primary" type="submit">Get my free automation audit <span class="arr">→</span></button>
+        </form>
+        <p class="hero-top-note">A free 5-minute audit: 2–3 concrete automations we'd build for you, in your inbox within 24 hours.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 Hero (the original, now the second screen) -->
   <section class="hero">
     <div class="wrap">
       <div class="grid12">
         <div class="copy">
           <p class="eyebrow reveal">AI automation agency</p>
-          <h1 class="reveal d1">AI websites and automations built around how your business works.</h1>
+          <h2 class="hero-title kinetic-on-view reveal d1">AI websites and automations built around how your business works.</h2>
           <p class="lead reveal d2">We design and build AI-powered websites, lead systems, booking flows, and business automations that reduce manual work and help you respond to customers faster.</p>
           <div class="actions reveal d3">
             <a class="btn primary" href="book.html">Book a Free Strategy Call <span class="arr">→</span></a>

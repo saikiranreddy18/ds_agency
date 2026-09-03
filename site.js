@@ -261,8 +261,31 @@
     area.addEventListener("pointerleave", () => { stage.style.removeProperty("--rx"); stage.style.removeProperty("--rz"); });
   }
 
+  /* Top hero: floating outcome bubbles, six slots around the headline, labels cycling through a pool. */
+  const ORBIT_POOL = [
+    ["cal", "Booking confirmed · 9:12 pm", 40], ["msg", "Missed call answered", 200], ["lead", "New lead qualified", 150],
+    ["bell", "Follow-up sent · day 3", 280], ["doc", "Quote chased automatically", 20], ["star", "Review request sent", 320],
+    ["crm", "CRM updated, no typing", 90], ["check", "Reminder delivered", 260], ["chart", "Weekly report ready", 180], ["team", "Handed to the right person", 120],
+  ];
+  const ORBIT_SLOTS = [[7, 24], [11, 68], [23, 92], [93, 22], [88, 66], [77, 92]];
+  function renderOrbit(el) {
+    const orb = (item, pos, i) => `<div class="orb" style="--x:${pos[0]};--y:${pos[1]};--i:${i}"><span class="av" style="--h:${item[2]}">${D.icons[item[0]] || ""}</span><span class="tag">${esc(item[1])}</span></div>`;
+    el.innerHTML = ORBIT_SLOTS.map((pos, i) => orb(ORBIT_POOL[i], pos, i)).join("");
+    if (reduced) return;
+    let next = ORBIT_SLOTS.length, busy = false;
+    setInterval(() => {
+      if (document.hidden || busy) return;
+      const orbs = el.querySelectorAll(".orb"); if (!orbs.length) return;
+      const o = orbs[Math.floor(Math.random() * orbs.length)]; const item = ORBIT_POOL[next++ % ORBIT_POOL.length];
+      busy = true; o.classList.add("swap");
+      setTimeout(() => { o.querySelector(".av").innerHTML = D.icons[item[0]] || ""; o.querySelector(".av").style.setProperty("--h", item[2]); o.querySelector(".tag").textContent = item[1]; }, 260);
+      setTimeout(() => { o.classList.remove("swap"); busy = false; }, 700);
+    }, 3200);
+  }
+
   document.querySelectorAll("[data-render]").forEach((el) => {
     const what = el.dataset.render;
+    if (what === "hero-orbit") renderOrbit(el);
     if (what === "hero-flow") el.innerHTML = renderFlow(D.heroFlow);
     if (what === "hero-3d") renderHero3D(el);
     if (what === "industry-bar") el.innerHTML = D.industries.map((i) => { const s = DATA_BY_ID.solution(i.sols[0]); return `<a class="ib" href="industries.html#${i.id}">${esc(i.name)}<span class="tipbox" role="tooltip"><b>Where it leaks</b>${esc(i.pain)}${s ? ` <b style="margin-top:6px">We start with</b>${esc(s.name)} · ${esc(s.badge || "")}` : ""}</span></a>`; }).join("");
@@ -279,6 +302,17 @@
       </article>`).join("");
   });
 
+  /* Top hero form: one field, then the audit modal with the website pre-filled. Falls back to the contact page. */
+  const heroForm = document.querySelector(".hero-top-form");
+  if (heroForm) heroForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const raw = heroForm.querySelector('[name="website"]').value.trim();
+    const site = raw && !/^https?:\/\//i.test(raw) ? "https://" + raw : raw;
+    if (window.DS && DS.track) DS.track("hero_audit_start", { hasWebsite: !!site });
+    if (window.DS && DS.openAudit) DS.openAudit("hero_audit", { website: site });
+    else location.href = "contact.html" + (site ? "?website=" + encodeURIComponent(site) : "");
+  });
+
   /* ---------------------------------------------------------------
      Effects: kinetic headline, personalised hero, mesh, cursor halo
   --------------------------------------------------------------- */
@@ -287,19 +321,22 @@
     const params = new URLSearchParams(location.search);
     const forId = params.get("for");
     const ind = forId && D.industries.find((i) => i.id === forId);
-    const h1 = hero.querySelector("h1");
+    const h1 = hero.querySelector("h1, .hero-title");
+    const topHero = document.querySelector(".hero-top");
     if (ind && h1) {
       hero.querySelector(".eyebrow").textContent = "AI automation agency · " + ind.name;
       h1.textContent = `AI websites and automations for ${ind.name.toLowerCase()}.`;
+      if (topHero) { topHero.querySelector(".eyebrow").textContent = "AI automation agency · " + ind.name; topHero.querySelector("h1").textContent = `AI websites and automations for ${ind.name.toLowerCase()}.`; }
       const lead = hero.querySelector(".lead");
       if (lead) lead.textContent = ind.hero || `${ind.pain} We build the website and the automations that close those gaps, in tools you already use.`;
       const explore = hero.querySelector('a[href="solutions.html"]'); if (explore) explore.href = "solutions.html?industry=" + encodeURIComponent(industryFilter(ind.id));
     }
-    // Kinetic headline: word-by-word reveal (one of the two lines that gets this treatment).
-    if (h1 && !reduced) {
-      const words = h1.textContent.trim().split(/\s+/);
-      h1.classList.add("kinetic"); h1.classList.remove("reveal", "d1");
-      h1.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(" ");
+    // Kinetic headline on load: the top hero's h1 when present, otherwise the hero heading (the other one animates on view).
+    const kin = (topHero && topHero.querySelector("h1")) || h1;
+    if (kin && !reduced) {
+      const words = kin.textContent.trim().split(/\s+/);
+      kin.classList.add("kinetic"); kin.classList.remove("reveal", "d1", "kinetic-on-view");
+      kin.innerHTML = words.map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(" ");
     }
     const mesh = document.createElement("div"); mesh.className = "mesh"; mesh.setAttribute("aria-hidden", "true"); mesh.innerHTML = "<i></i><i></i><i></i>";
     hero.prepend(mesh);
@@ -575,9 +612,10 @@
     </div>`;
     document.body.append(modal);
     let opener = null;
-    const open = (source) => {
-      if (shown) return;
+    const open = (source, force) => {
+      if (shown && !force) return;
       shown = true; try { sessionStorage.setItem("exitShown", "1"); } catch (err) { /* ignore */ }
+      modal.querySelector(".eyebrow").textContent = force ? "Free audit" : "Before you go";
       modal.querySelector('[name="source"]').value = source;
       modal.querySelector('[name="page"]').value = location.pathname + location.search;
       opener = document.activeElement;
@@ -590,6 +628,13 @@
       modal.classList.remove("open"); document.body.classList.remove("modal-open");
       if (opener && typeof opener.focus === "function" && document.contains(opener)) opener.focus();
       opener = null;
+    };
+    /* Deliberate open (top hero form): always opens, pre-fills the website, focuses the email field. */
+    window.DS = window.DS || {};
+    window.DS.openAudit = (source, prefill) => {
+      open(source || "hero_audit", true);
+      const w = modal.querySelector('[name="website"]'); if (prefill && prefill.website) w.value = prefill.website;
+      (w.value ? modal.querySelector('[name="email"]') : w).focus();
     };
     modal.querySelector(".close").addEventListener("click", close);
     modal.addEventListener("click", (e) => { if (e.target === modal) close(); });

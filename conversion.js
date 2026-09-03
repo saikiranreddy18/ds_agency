@@ -24,6 +24,7 @@
   const SOURCES = {
     contact: "contact_page",
     audit: "exit_intent_audit",
+    heroAudit: "hero_audit",
     auditMobile: "mobile_engagement",
     workflow: "workflow_modal",
     stack: "build_stack_email",

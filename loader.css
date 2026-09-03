@@ -13,7 +13,7 @@
    - Review any phase frozen: index.html?intro=phase:chaos|connect|work|brand
 ================================================================== */
 html.intro-on { overflow: hidden; }
-html.intro-on .hero .kinetic .w { animation-play-state: paused; }
+html.intro-on .kinetic .w { animation-play-state: paused; }
 
 .ds-loader { display: none; }
 html.intro-on .ds-loader { display: grid; }

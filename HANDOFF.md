@@ -65,6 +65,7 @@ Posted as `multipart/form-data` (not JSON). Web3Forms, Formspree, n8n and Make a
 | `source` | Where | Extra fields | Suggested handling |
 |---|---|---|---|
 | `contact_page` | Contact form | `name, email, company, country, website, industry, automate, message, source_page` | Medium to high intent. Reply personally. |
+| `hero_audit` | Top hero field ("Get my free automation audit"), opens the audit modal with the website pre-filled | `website, email, bottleneck, message` | High intent. Same follow-up as the audit. |
 | `exit_intent_audit` | Audit modal, desktop | `website, email, bottleneck, message` | High intent. Fast follow-up with the 3-point audit. |
 | `mobile_engagement` | Audit modal, touch devices | same as above | Same as above. |
 | `workflow_modal` | "Tell us your workflow" | `website, email, goal, message` | Medium intent. Send the recommended stack plus one case study. |
