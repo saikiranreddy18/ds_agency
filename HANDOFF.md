@@ -2,6 +2,19 @@
 
 Everything a visitor can submit on the DS Agency site, what arrives at your webhook, and how to switch from testing to production. Verified end to end on 2026-09-03 with the local echo endpoint.
 
+## 0a. AI chat (read this first if the assistant says "not configured")
+
+There are **two Vercel projects** deploying this repo:
+
+| Project | URL | GROQ_API_KEY |
+|---|---|---|
+| `ds-agency` (the live site) | https://ds-agency.vercel.app | **missing** as of 2026-09-03 |
+| `ds-agency-siak` | https://ds-agency-in.vercel.app | set (Production + Preview) |
+
+The key was added to `ds-agency-siak`. Add the same key to `ds-agency` (Settings → Environment Variables → Production) and redeploy, or delete the duplicate project and point the domain at the one that has the key. Check with `GET /api/chat` on the domain: `configured` must be `true` and `model` must show a model id.
+
+Models: Groq moved `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` to enterprise-only in 2026, so the function no longer hard-codes a model. It asks Groq's `/models` list and picks the first available from its preference list (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, Llama 3.3/4, Qwen 3, Kimi, `groq/compound-mini`), and retries once with the next model if the chosen one disappears. Set `CHAT_MODEL` only if you want to pin one.
+
 ## 0. Live status (2026-09-03)
 
 Forms are wired to n8n and verified end to end:
