@@ -35,6 +35,10 @@ window.SITE = {
   // Same-origin relay (api/form.js on Vercel) used only if the direct post to formEndpoint fails,
   // e.g. CORS on a preview domain. Leave empty on hosts without serverless functions.
   formProxy: "/api/form",
+  // Last resort, sent from the visitor's browser if the webhook and the relay both fail:
+  // the fields are emailed to this inbox through FormSubmit (free, no key; the inbox clicks
+  // one activation link the first time). Empty string disables it.
+  formBackupEmail: "saikiranreddytallapureddy@gmail.com",
   // While true, every payload carries test_mode=true so test submissions can be
   // filtered out downstream. Set to false (or remove) before real traffic.
   testMode: false,

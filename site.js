@@ -3,21 +3,35 @@
   const S = window.SITE || {};
   const D = window.DATA || { icons: {}, solutions: [], cases: [], industries: [] };
 
-  /* Post a form payload to the webhook. If the browser cannot reach it (CORS on a preview or
-     sister domain, a network hiccup), retry once through the same-origin relay
-     (site.config.js -> formProxy). Every form on the site goes through this. */
+  /* Post a form payload. Three tiers, each tried only if the previous one failed:
+       1. the webhook (site.config.js -> formEndpoint), straight from the browser;
+       2. the same-origin relay (formProxy), for CORS on preview or sister domains;
+       3. FormSubmit from the browser to formBackupEmail, so a lead still arrives when the webhook is down.
+     Every form on the site goes through this. */
   window.DS = window.DS || {};
   window.DS.postForm = async function (data, endpoint) {
     const url = endpoint || S.formEndpoint;
-    const attempt = async (u) => {
+    const attempt = async (u, init) => {
       const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
-      try { return await fetch(u, { method: "POST", body: data, headers: { Accept: "application/json" }, signal: ctrl.signal }); }
+      try { return await fetch(u, Object.assign({ method: "POST", body: data, headers: { Accept: "application/json" } }, init || {}, { signal: ctrl.signal })); }
       finally { clearTimeout(to); }
     };
     const proxy = S.formProxy && S.formProxy !== url ? S.formProxy : "";
-    try { const res = await attempt(url); if (res.ok || !proxy) return res; }
-    catch (err) { if (!proxy) throw err; }
-    return attempt(proxy);
+    let last = null;
+    try { last = await attempt(url); if (last.ok) return last; } catch (err) { last = null; }
+    if (proxy) { try { last = await attempt(proxy); if (last.ok) return last; } catch (err) { last = null; } }
+    if (S.formBackupEmail) {
+      const f = {}; data.forEach((v, k) => { if (typeof v === "string") f[k] = v; });
+      f._subject = "[DS Agency] " + (f.source || "form") + (f.email ? " · " + f.email : "") + " (backup channel)";
+      f._template = "table"; f._captcha = "false"; f.delivered_via = "backup from the visitor's browser: webhook and relay did not answer";
+      try {
+        const r = await attempt("https://formsubmit.co/ajax/" + encodeURIComponent(S.formBackupEmail), { body: JSON.stringify(f), headers: { "Content-Type": "application/json", Accept: "application/json" } });
+        const j = await r.json().catch(() => null);
+        if (r.ok && j && String(j.success) === "true") return new Response(JSON.stringify({ ok: true, via: "backup" }), { status: 200, headers: { "Content-Type": "application/json" } });
+      } catch (err) { /* fall through */ }
+    }
+    if (last) return last;
+    throw new Error("unreachable");
   };
   const page = document.body.dataset.page || "";
   const name = S.name || "[Agency name]";
