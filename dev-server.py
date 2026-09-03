@@ -88,9 +88,9 @@ class Handler(SimpleHTTPRequestHandler):
         if path != "/api/chat":
             self._json(404, {"error": "not_found"})
             return
-        key = os.environ.get("GROQ_API_KEY")
+        key = next((os.environ.get(n, "").strip() for n in ("GROQ_API_KEY", "GROQ_KEY", "GROQ_API", "GROQ_TOKEN", "GROQ") if os.environ.get(n, "").strip()), "")
         if not key:
-            self._json(200, {"error": "not_configured"})
+            self._json(200, {"error": "not_configured", "groqVarsSeen": [k for k in os.environ if k.upper().startswith("GROQ")]})
             return
         try:
             n = int(self.headers.get("Content-Length", "0"))

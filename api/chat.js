@@ -20,11 +20,22 @@ Rules:
 CONTEXT:
 ${context}`;
 
+/* Accept the common name variants so a small naming slip in the dashboard still works. */
+const KEY_NAMES = ["GROQ_API_KEY", "GROQ_KEY", "GROQ_API", "GROQ_TOKEN", "GROQ"];
+const findKey = () => { for (const n of KEY_NAMES) { const v = (process.env[n] || "").trim(); if (v) return v; } return ""; };
+/* Names (never values) of GROQ-prefixed variables the function can see: helps diagnose a wrong name or environment. */
+const seenNames = () => Object.keys(process.env).filter((k) => /^GROQ/i.test(k));
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  if (req.method === "GET") {
+    // Health check: GET /api/chat → whether a key is configured, the model, and which GROQ* names exist.
+    res.status(200).json({ configured: !!findKey(), model: process.env.CHAT_MODEL || "llama-3.3-70b-versatile", env: process.env.VERCEL_ENV || "unknown", groqVarsSeen: seenNames() });
+    return;
+  }
   if (req.method !== "POST") { res.status(405).json({ error: "method_not_allowed" }); return; }
-  const key = process.env.GROQ_API_KEY;
-  if (!key) { res.status(200).json({ error: "not_configured" }); return; }
+  const key = findKey();
+  if (!key) { res.status(200).json({ error: "not_configured", groqVarsSeen: seenNames(), env: process.env.VERCEL_ENV || "unknown" }); return; }
 
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (e) { body = null; } }
